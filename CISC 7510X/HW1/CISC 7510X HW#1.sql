@@ -33,3 +33,13 @@
 -- 	purchase.customerid=42
 
 -- 4.
+select
+	customerid
+from
+	store.purchase
+join
+	store.purchase_items
+	on
+	purchase_items.purchaseid = purchase.purchaseid
+where
+	purchase_items.productid=42
