@@ -54,10 +54,27 @@
 -- 	store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
 
 -- 6.
-select
-	description
-from 
-	store.product
-where
-	store.product.productid not in (select distinct store.purchase_items.productid from store.purchase_items)
+-- select
+-- 	description
+-- from 
+-- 	store.product
+-- where
+-- 	store.product.productid not in (select distinct store.purchase_items.productid from store.purchase_items)
 
+-- 7.
+-- select
+-- 	productid
+-- from
+-- 	store.purchase_items
+-- join
+-- 	store.purchase
+-- 	on
+-- 	purchase.purchaseid = purchase_items.purchaseid
+-- join
+-- 	store.customer
+-- 	on
+-- 	customer.customerid = purchase.customerid
+-- where
+-- 	customer.zip='10001'
+
+-- 8.
