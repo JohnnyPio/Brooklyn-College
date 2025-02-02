@@ -78,3 +78,17 @@
 -- 	customer.zip='10001'
 
 -- 8.
+-- select
+-- 	100 * count(distinct(purchase_items.productid=42))/count(customer.customerid)
+-- from
+-- 	store.customer
+-- join
+-- 	store.purchase
+-- 	on
+-- 	purchase.customerid = customer.customerid
+-- join
+-- 	store.purchase_items
+-- 	on
+-- 	purchase_items.purchaseid = purchase.purchaseid
+
+-- 9.
