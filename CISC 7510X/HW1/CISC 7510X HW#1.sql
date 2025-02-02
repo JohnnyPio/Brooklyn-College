@@ -33,13 +33,23 @@
 -- 	purchase.customerid=42
 
 -- 4.
-select
-	customerid
-from
-	store.purchase
-join
-	store.purchase_items
-	on
-	purchase_items.purchaseid = purchase.purchaseid
-where
-	purchase_items.productid=42
+-- select
+-- 	customerid
+-- from
+-- 	store.purchase
+-- join
+-- 	store.purchase_items
+-- 	on
+-- 	purchase_items.purchaseid = purchase.purchaseid
+-- where
+-- 	purchase_items.productid=42
+
+-- 5. 
+-- select
+-- 	fname,
+-- 	lname
+-- from 
+-- 	store.customer
+-- where
+-- 	store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
+
