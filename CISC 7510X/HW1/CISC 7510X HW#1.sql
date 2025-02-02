@@ -7,15 +7,29 @@
 -- 	product.productid=42
 
 -- 2.
-select
-	fname,
-	lname,
-	street1,
-	street2,
-	city,
-	state,
-	zip
-from
-	store.customer
-where
-	customer.customerid=42
+-- select
+-- 	fname,
+-- 	lname,
+-- 	street1,
+-- 	street2,
+-- 	city,
+-- 	state,
+-- 	zip
+-- from
+-- 	store.customer
+-- where
+-- 	customer.customerid=42
+
+-- 3.
+-- select
+-- 	productid
+-- from
+-- 	store.purchase_items
+-- join
+-- 	store.purchase
+-- 	on
+-- 	purchase.purchaseid = purchase_items.purchaseid
+-- where
+-- 	purchase.customerid=42
+
+-- 4.
