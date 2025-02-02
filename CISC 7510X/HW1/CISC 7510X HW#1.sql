@@ -53,3 +53,11 @@
 -- where
 -- 	store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
 
+-- 6.
+select
+	description
+from 
+	store.product
+where
+	store.product.productid not in (select distinct store.purchase_items.productid from store.purchase_items)
+
