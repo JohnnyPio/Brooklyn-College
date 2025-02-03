@@ -1,3 +1,6 @@
+-- TODO: Check JOINs
+-- Look at 8
+
 -- -- 1. 
 -- select
 -- 	description
@@ -79,7 +82,26 @@
 
 -- 8.
 -- select
--- 	100 * count(distinct(purchase_items.productid=42))/count(customer.customerid)
+-- 	100 * 
+-- 	count(distinct 
+-- 		case 
+-- 			when purchase_items.productid = 42 then customer.customerid 
+-- 		end)/
+-- 	count(customer.customerid)
+-- from
+-- 	store.purchase_items
+-- join
+-- 	store.purchase
+-- 	on
+-- 	purchase_items.purchaseid = purchase.purchaseid
+-- join
+-- 	store.customer
+-- 	on
+-- 	customer.customerid = purchase.customerid
+
+-- -- 9.
+-- select
+-- 	100 * count(distinct(purchase_items.productid=42))/count(distinct(purchase_items.productid=24))
 -- from
 -- 	store.customer
 -- join
@@ -90,5 +112,3 @@
 -- 	store.purchase_items
 -- 	on
 -- 	purchase_items.purchaseid = purchase.purchaseid
-
--- 9.
