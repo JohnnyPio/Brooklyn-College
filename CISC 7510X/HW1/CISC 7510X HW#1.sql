@@ -99,16 +99,34 @@
 -- 	on
 -- 	customer.customerid = purchase.customerid
 
--- -- 9.
--- select
--- 	100 * count(distinct(purchase_items.productid=42))/count(distinct(purchase_items.productid=24))
--- from
--- 	store.customer
--- join
--- 	store.purchase
--- 	on
--- 	purchase.customerid = customer.customerid
--- join
--- 	store.purchase_items
--- 	on
--- 	purchase_items.purchaseid = purchase.purchaseid
+-- 9.
+-- ChatGPT prompt: For the below example store' schema: 
+-- product(productid,description,listprice)
+-- customer(customerid,username,fname,lname,street1,street2,city,state,zip)
+-- purchase(purchaseid,purchasetimestamp,customerid)
+-- purchase_items(itemid,purchaseid,productid,quantity,price)
+-- Write a SQL query that answers this question: 
+-- Of customers who purchased productid=42, what percentage also purchased productid=24?
+
+-- I don't think this is correct.
+    SELECT DISTINCT customerid
+    FROM store.purchase_items
+    JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
+    WHERE productid = 42
+	
+-- WITH CustomersWhoPurchased42 AS (
+--     SELECT DISTINCT customerid
+--     FROM store.purchase_items
+--     JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
+--     WHERE productid = 42
+-- ),
+-- CustomersWhoAlsoPurchased24 AS (
+--     SELECT DISTINCT customerid
+--     FROM store.purchase_items
+--     JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
+--     WHERE productid = 24
+--     AND customerid IN (SELECT customerid FROM CustomersWhoPurchased42)
+-- )
+-- SELECT
+--     (COUNT(*) * 100.0) / (SELECT COUNT(*) FROM CustomersWhoPurchased42) AS Percentage
+-- FROM CustomersWhoAlsoPurchased24;
