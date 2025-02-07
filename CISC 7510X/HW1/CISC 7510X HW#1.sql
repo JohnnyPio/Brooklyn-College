@@ -107,26 +107,31 @@
 -- purchase_items(itemid,purchaseid,productid,quantity,price)
 -- Write a SQL query that answers this question: 
 -- Of customers who purchased productid=42, what percentage also purchased productid=24?
-
--- I don't think this is correct.
-    SELECT DISTINCT customerid
-    FROM store.purchase_items
-    JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
-    WHERE productid = 42
 	
--- WITH CustomersWhoPurchased42 AS (
---     SELECT DISTINCT customerid
---     FROM store.purchase_items
---     JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
---     WHERE productid = 42
+-- with CustomersWhoPurchased42 as (
+--     select distinct customerid
+--     from store.purchase_items
+--     join store.purchase on purchase_items.purchaseid = purchase.purchaseid
+--     where productid = 42
 -- ),
--- CustomersWhoAlsoPurchased24 AS (
---     SELECT DISTINCT customerid
---     FROM store.purchase_items
---     JOIN store.purchase ON purchase_items.purchaseid = purchase.purchaseid
---     WHERE productid = 24
---     AND customerid IN (SELECT customerid FROM CustomersWhoPurchased42)
+-- CustomersWhoAlsoPurchased24 as (
+--     select distinct customerid
+--     from store.purchase_items
+--     join store.purchase on purchase_items.purchaseid = purchase.purchaseid
+--     where productid = 24
+--     and customerid in (select customerid from CustomersWhoPurchased42)
 -- )
--- SELECT
---     (COUNT(*) * 100.0) / (SELECT COUNT(*) FROM CustomersWhoPurchased42) AS Percentage
--- FROM CustomersWhoAlsoPurchased24;
+-- select
+--     (count(*) * 100) / (select count(*) from CustomersWhoPurchased42)
+-- from CustomersWhoAlsoPurchased24;
+
+-- 10. 
+-- select
+-- 	productid
+-- from store.purchase_items
+-- join store.purchase on purchase_items.purchaseid = purchase.purchaseid
+-- join store.customer on purchase.customerid = customer.customerid
+-- where customer.state = 'NY'
+-- group by productid
+-- order by count(productid) desc
+-- limit 1
