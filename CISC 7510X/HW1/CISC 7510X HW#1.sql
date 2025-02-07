@@ -28,7 +28,7 @@
 -- select customerid
 -- from store.purchase
 -- join store.purchase_items on purchase_items.purchaseid = purchase.purchaseid
--- where purchase_items.productid=42
+-- where purchase_items.productid=24
 
 -- 5. 
 -- select
@@ -107,3 +107,10 @@
 -- limit 1
 
 -- 12. 
+-- select customerid
+-- from store.purchase
+-- join store.purchase_items on purchase_items.purchaseid = purchase.purchaseid
+-- where purchase_items.productid=24
+-- and purchase.purchasetimestamp < '2020-07-04'
+
+-- 13. 
