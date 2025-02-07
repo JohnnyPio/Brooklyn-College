@@ -2,12 +2,9 @@
 -- Look at 8
 
 -- -- 1. 
--- select
--- 	description
--- from
--- 	store.product
--- where
--- 	product.productid=42
+-- select description
+-- from store.product
+-- where product.productid=42
 
 -- 2.
 -- select
@@ -16,91 +13,55 @@
 -- 	street1,
 -- 	street2,
 -- 	city,
--- 	state,
+-- 	customer.state,
 -- 	zip
--- from
--- 	store.customer
--- where
--- 	customer.customerid=42
+-- from store.customer
+-- where customer.customerid=42
 
 -- 3.
--- select
--- 	productid
--- from
--- 	store.purchase_items
--- join
--- 	store.purchase
--- 	on
--- 	purchase.purchaseid = purchase_items.purchaseid
--- where
--- 	purchase.customerid=42
+-- select productid
+-- from store.purchase_items
+-- join store.purchase on purchase.purchaseid = purchase_items.purchaseid
+-- where purchase.customerid=42
 
 -- 4.
--- select
--- 	customerid
--- from
--- 	store.purchase
--- join
--- 	store.purchase_items
--- 	on
--- 	purchase_items.purchaseid = purchase.purchaseid
--- where
--- 	purchase_items.productid=42
+-- select customerid
+-- from store.purchase
+-- join store.purchase_items on purchase_items.purchaseid = purchase.purchaseid
+-- where purchase_items.productid=42
 
 -- 5. 
 -- select
 -- 	fname,
 -- 	lname
--- from 
--- 	store.customer
--- where
--- 	store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
+-- from store.customer
+-- where store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
 
 -- 6.
--- select
--- 	description
--- from 
--- 	store.product
--- where
--- 	store.product.productid not in (select distinct store.purchase_items.productid from store.purchase_items)
+-- select description
+-- from store.product
+-- where store.product.productid not in (select distinct store.purchase_items.productid from store.purchase_items)
 
 -- 7.
--- select
--- 	productid
--- from
--- 	store.purchase_items
--- join
--- 	store.purchase
--- 	on
--- 	purchase.purchaseid = purchase_items.purchaseid
--- join
--- 	store.customer
--- 	on
--- 	customer.customerid = purchase.customerid
--- where
--- 	customer.zip='10001'
+-- select productid
+-- from store.purchase_items
+-- join store.purchase on purchase.purchaseid = purchase_items.purchaseid
+-- join store.customer	on customer.customerid = purchase.customerid
+-- where customer.zip='10001'
 
 -- 8.
 -- select
--- 	100 * 
--- 	count(distinct 
+-- 	100 * count(distinct 
 -- 		case 
 -- 			when purchase_items.productid = 42 then customer.customerid 
 -- 		end)/
 -- 	count(customer.customerid)
--- from
--- 	store.purchase_items
--- join
--- 	store.purchase
--- 	on
--- 	purchase_items.purchaseid = purchase.purchaseid
--- join
--- 	store.customer
--- 	on
--- 	customer.customerid = purchase.customerid
+-- from store.purchase_items
+-- join	store.purchase on purchase_items.purchaseid = purchase.purchaseid
+-- join	store.customer on customer.customerid = purchase.customerid
 
 -- 9.
--- ChatGPT prompt: For the below example store' schema: 
+-- I used ChatGPT for this one. ChatGPT prompt: For the below example 'store' schema: 
 -- product(productid,description,listprice)
 -- customer(customerid,username,fname,lname,street1,street2,city,state,zip)
 -- purchase(purchaseid,purchasetimestamp,customerid)
@@ -126,8 +87,7 @@
 -- from CustomersWhoAlsoPurchased24;
 
 -- 10. 
--- select
--- 	productid
+-- select productid
 -- from store.purchase_items
 -- join store.purchase on purchase_items.purchaseid = purchase.purchaseid
 -- join store.customer on purchase.customerid = customer.customerid
@@ -137,8 +97,7 @@
 -- limit 1
 
 -- 11. 
--- select
--- 	productid
+-- select productid
 -- from store.purchase_items
 -- join store.purchase on purchase_items.purchaseid = purchase.purchaseid
 -- join store.customer on purchase.customerid = customer.customerid
