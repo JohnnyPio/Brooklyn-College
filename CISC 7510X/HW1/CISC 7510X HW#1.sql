@@ -135,3 +135,16 @@
 -- group by productid
 -- order by count(productid) desc
 -- limit 1
+
+-- 11. 
+-- select
+-- 	productid
+-- from store.purchase_items
+-- join store.purchase on purchase_items.purchaseid = purchase.purchaseid
+-- join store.customer on purchase.customerid = customer.customerid
+-- where customer.state in ('NJ','NY','CT')
+-- group by productid
+-- order by count(productid) desc
+-- limit 1
+
+-- 12. 
