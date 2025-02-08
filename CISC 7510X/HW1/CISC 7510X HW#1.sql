@@ -111,7 +111,7 @@
 -- where purchase_items.productid=24
 -- and purchase.purchasetimestamp < '2020-07-04'
 
--- 13. Note even close
+-- 13. I also used ChatGPT to help on this one, although I had to make some modifications to get it to work.
 -- ChatGPT prompt: For the below example store' schema: 
 -- product(productid,description,listprice)
 -- customer(customerid,username,fname,lname,street1,street2,city,state,zip)
@@ -121,16 +121,17 @@
 -- For each customer, find all products from their last purchase.
 
 with LatestPurchases as (
-    select customerid, max(purchasetimestamp) as last_purchase_time
+    select customerid, 
+	max(purchasetimestamp) as last_purchase_time
     from store.purchase
     group by customerid
 )
-select LatestPurchases.customerid, purchase_items.productid, purchase.purchasetimestamp
+select LatestPurchases.customerid, purchase_items.productid
 from LatestPurchases
 join store.purchase on LatestPurchases.last_purchase_time = purchase.purchasetimestamp
-	-- and LatestPurchases.customerid = purchase.customerid 
 join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
-join store.product on purchase_items.productid = product.productid;
+
+-- 14.
 
 
 
