@@ -120,19 +120,29 @@
 -- Write the simplest SQL query that answers this question (take your time and think step-by-step): 
 -- For each customer, find all products from their last purchase.
 
-with LatestPurchases as (
-    select customerid, 
-	max(purchasetimestamp) as last_purchase_time
-    from store.purchase
-    group by customerid
-)
-select LatestPurchases.customerid, purchase_items.productid
-from LatestPurchases
-join store.purchase on LatestPurchases.last_purchase_time = purchase.purchasetimestamp
-join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+-- with LatestPurchases as (
+-- 	select customerid, 
+-- 	max(purchasetimestamp) as last_purchase_time
+-- 	from store.purchase
+-- 	group by customerid
+-- )
+-- select LatestPurchases.customerid, purchase_items.productid
+-- from LatestPurchases
+-- join store.purchase on LatestPurchases.last_purchase_time = purchase.purchasetimestamp
+-- join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
 
 -- 14.
-
+with Last10Purchases as (
+    select customerid, 
+	purchasetimestamp
+    from store.purchase
+	order by purchasetimestamp desc
+	limit 3
+)
+select Last10Purchases.customerid, purchase_items.productid, Last10Purchases.purchasetimestamp
+from Last10Purchases
+join store.purchase on Last10Purchases.purchasetimestamp = purchase.purchasetimestamp
+join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
 
 
 
