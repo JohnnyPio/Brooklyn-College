@@ -31,9 +31,7 @@
 -- where purchase_items.productid=24
 
 -- 5. 
--- select
--- 	fname,
--- 	lname
+-- select concat(fname,' ',lname)
 -- from store.customer
 -- where store.customer.customerid not in (select distinct store.purchase.customerid from store.purchase)
 
@@ -113,4 +111,27 @@
 -- where purchase_items.productid=24
 -- and purchase.purchasetimestamp < '2020-07-04'
 
--- 13. 
+-- 13. Note even close
+-- with LastPurchases as (
+--     select
+-- 		customerid,
+-- 		max(purchasetimestamp)
+--     from store.purchase
+--     group by customerid
+-- )
+-- select
+-- 	customer.customerid,
+-- 	purchase_items.productid
+-- from store.customer
+-- join LastPurchases on customer.customerid = LastPurchases.customerid
+-- join store.purchase on customer.customerid = purchase.customerid
+-- join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+
+
+-- 15.
+select concat(fname,' ',lname)
+from store.customer
+join store.purchase on customer.customerid = purchase.customerid 
+join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+where purchase_items.productid = '42'
+	and purchasetimestamp >= current_date - interval '3 months'
