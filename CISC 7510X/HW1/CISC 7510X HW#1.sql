@@ -112,26 +112,34 @@
 -- and purchase.purchasetimestamp < '2020-07-04'
 
 -- 13. Note even close
--- with LastPurchases as (
---     select
--- 		customerid,
--- 		max(purchasetimestamp)
---     from store.purchase
---     group by customerid
--- )
--- select
--- 	customer.customerid,
--- 	purchase_items.productid
--- from store.customer
--- join LastPurchases on customer.customerid = LastPurchases.customerid
--- join store.purchase on customer.customerid = purchase.customerid
--- join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+-- ChatGPT prompt: For the below example store' schema: 
+-- product(productid,description,listprice)
+-- customer(customerid,username,fname,lname,street1,street2,city,state,zip)
+-- purchase(purchaseid,purchasetimestamp,customerid)
+-- purchase_items(itemid,purchaseid,productid,quantity,price)
+-- Write the simplest SQL query that answers this question (take your time and think step-by-step): 
+-- For each customer, find all products from their last purchase.
+
+with LatestPurchases as (
+    select customerid, max(purchasetimestamp) as last_purchase_time
+    from store.purchase
+    group by customerid
+)
+select LatestPurchases.customerid, purchase_items.productid, purchase.purchasetimestamp
+from LatestPurchases
+join store.purchase on LatestPurchases.last_purchase_time = purchase.purchasetimestamp
+	-- and LatestPurchases.customerid = purchase.customerid 
+join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+join store.product on purchase_items.productid = product.productid;
+
+
+
 
 
 -- 15.
-select concat(fname,' ',lname)
-from store.customer
-join store.purchase on customer.customerid = purchase.customerid 
-join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
-where purchase_items.productid = '42'
-	and purchasetimestamp >= current_date - interval '3 months'
+-- select concat(fname,' ',lname)
+-- from store.customer
+-- join store.purchase on customer.customerid = purchase.customerid 
+-- join store.purchase_items on purchase.purchaseid = purchase_items.purchaseid
+-- where purchase_items.productid = '42'
+-- 	and purchasetimestamp >= current_date - interval '3 months'
