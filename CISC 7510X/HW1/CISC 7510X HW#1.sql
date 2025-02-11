@@ -132,20 +132,22 @@ SET search_path = store, "$user", public;
 -- join purchase on LatestPurchases.last_purchase_time = purchase.purchasetimestamp
 -- join purchase_items on purchase.purchaseid = purchase_items.purchaseid
 
--- 14.
--- with Last10Purchases as (
---     select customerid, 
--- 	purchasetimestamp
---     from purchase
--- 	order by purchasetimestamp desc
--- 	limit 3
+-- 14. Credit to Adil in the BC Spring 2025 Whatsapp on this one :) 
+-- with CustomerPurchasesPartitionedbyID as (
+--     select 
+--         p.customerid, 
+--         p.purchaseid, 
+--         pi.productid, 
+--         pr.description,
+--         row_number() over (partition by p.customerid order by p.purchasetimestamp desc) as rownum
+--     from purchase p
+--     join purchase_items pi on p.purchaseid = pi.purchaseid
+--     join product pr on pi.productid = pr.productid
 -- )
--- select Last10Purchases.customerid, purchase_items.productid, Last10Purchases.purchasetimestamp
--- from Last10Purchases
--- join purchase on Last10Purchases.purchasetimestamp = purchase.purchasetimestamp
--- join purchase_items on purchase.purchaseid = purchase_items.purchaseid
-
-
+-- select customerid, productid, description, rownum
+-- from CustomerPurchasesPartitionedbyID
+-- where rownum <= 10
+-- order by customerid asc, rownum asc
 
 
 -- 15.
