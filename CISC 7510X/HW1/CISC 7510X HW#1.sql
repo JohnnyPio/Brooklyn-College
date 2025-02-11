@@ -1,5 +1,4 @@
 -- TODO: Check JOINs
--- Look at 8
 SET search_path = store, "$user", public;
 
 -- -- 1. 
@@ -54,10 +53,10 @@ SET search_path = store, "$user", public;
 -- 		case 
 -- 			when purchase_items.productid = 42 then customer.customerid 
 -- 		end)/
--- 	count(customer.customerid)
+-- 	count(distinct customer.customerid)
 -- from purchase_items
--- join	purchase on purchase_items.purchaseid = purchase.purchaseid
--- join	customer on customer.customerid = purchase.customerid
+-- join purchase on purchase_items.purchaseid = purchase.purchaseid
+-- right join customer on customer.customerid = purchase.customerid
 
 -- 9.
 -- I used ChatGPT for this one. ChatGPT prompt: For the below example 'store' schema: 
