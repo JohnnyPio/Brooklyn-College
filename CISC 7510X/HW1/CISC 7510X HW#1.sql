@@ -146,4 +146,4 @@ from customer
 join purchase on customer.customerid = purchase.customerid 
 join purchase_items on purchase.purchaseid = purchase_items.purchaseid
 where purchase_items.productid = '42'
-	and purchasetimestamp >= current_date - interval '3 months'
+	and purchasetimestamp >= current_date - interval '3 months';
