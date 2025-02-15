@@ -1,4 +1,5 @@
 ;John Piotrowski - 7410x - HW2
+;4.1-4.23, 5.2-5.7
 
 ;;; 4.1
 (defun make-even (x)
@@ -28,9 +29,42 @@
 ;first-is-smaller (compare (+ 2 2) 5)
 ;numbers-are-the-same (compare 6 (* 2 3))
 
-;;;4.5
+;;;4.6
 (defun my-abs (x) 
   (cond ((< x 0) (* x -1))
         (t x)))
 
-;;;4.6
+;;;4.7
+;; (cond (symbolp x) ’symbol
+;;       (t ’not-a-symbol))
+;; Incorrect, correct is below:
+;; (cond ((symbolp x) ’symbol)
+;;       (t ’not-a-symbol))
+
+
+;; (cond ((symbolp x) ’symbol)
+;;       (t ’not-a-symbol))
+;; Correct!
+
+
+;; (cond ((symbolp x) (’symbol))
+;;       (t ’not-a-symbol))
+;; Incorrect - don't need the extra parenthesis around 'symbol
+
+
+;; (cond ((symbolp x) ’symbol)
+;;       ((t ’not-a-symbol)))
+;; Incorrect - don't need the extra parenthesis around (t ’not-a-symbol) 
+
+;;;4.8
+(defun emphasize3 (x)
+  (cond ((equal (first x) 'good)
+         (cons 'great (rest x)))
+         ((equal (first x) 'bad)
+          (cons 'awful (rest x)))
+         (t (cons 'very x))))
+
+;; CL-USER> (emphasize3 '(very long day))
+;; (VERY VERY LONG DAY)
+
+;;;4.9 
