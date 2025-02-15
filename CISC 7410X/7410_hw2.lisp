@@ -107,3 +107,29 @@
   (if (equal x 99) 1 (+ x 1)))
 
 ;;;4.13
+(defun howcompute (n1 n2 n3)
+  (cond ((equal (+ n1 n2) n3) 'sum-of)
+        ((equal (* n1 n2) n3) 'product-of)
+        (t '(beats me))))
+;; to extend howcompute you could add more clauses for other basic mat operations like subtraction and division, along with exponents and modulo
+
+;;;4.14
+;; CL-USER> (and 'fee 'fie 'foe)
+;; FOE
+
+;; CL-USER> (or 'fee 'fie 'foe)
+;; FEE
+
+;; CL-USER> (or nil 'foe nil)
+;; FOE
+
+;; CL-USER> (and 'fee 'fie nil)
+;; NIL
+
+;; CL-USER> (and (equal 'abc 'abc) 'yes)
+;; YES
+
+;; CL-USER> (or (equal 'abc 'abc) 'yes)
+;; T
+
+;;;4.15
