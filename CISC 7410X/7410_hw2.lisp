@@ -14,7 +14,6 @@
 (defun my-not (x)
   (if x nil t))
 
-
 ;;;4.4
 (defun ordered (x y)
   (if (< x y) (list x y) (list y x)))
@@ -24,7 +23,6 @@
   (cond ((equal x y) 'numbers-are-the-same)
   ((< x y) 'first-is-smaller)
   ((> x y) 'first-is-bigger)))
-
 ;first-is-bigger (compare 9 1)
 ;first-is-smaller (compare (+ 2 2) 5)
 ;numbers-are-the-same (compare 6 (* 2 3))
@@ -158,7 +156,7 @@
       (t 'tie)))
 
 ;;;4.19
-;; Commenting the below expressions to not break the compiler
+;; Commenting the below expressions to not cause errors compiling this file.
 ;; (cond ((not x) nil)
 ;;       ((not y) nil)
 ;;       ((not z) nil)
@@ -216,5 +214,14 @@
 ;; If WHERE-IS has 8 CONDs, it will need 7 IFs. WHERE-IS-3 will need 1 OR and 7 ANDs.
 
 
-;;;;;;;;;;;;;;;;;;
-;;;5.2
+;;;;;; CHAPTER 5
+;;;5.2. Actions functions take besides returning a value, such as changing the value of a variable.
+
+;;;5.3. A global variable is not local to any specific function and is accessible everywhere. A local variable is a variable who's scope is restricted to the body of a function.
+
+;;;5.4. SETF must be a macro function instead of a regular function because it doesn't evaluate the first argument - the variable name.
+
+;;;5.5. Yes, LET and LET* are equivalent when only setting 1 local variable as there are no possible dependent variables.
+
+;;;5.6.
+
