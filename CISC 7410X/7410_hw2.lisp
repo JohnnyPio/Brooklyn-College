@@ -133,3 +133,28 @@
 ;; T
 
 ;;;4.15
+(defun ged (n1 n2)
+  (or (> n1 n2) (equal n1 n2)))
+
+;;;4.16
+(defun square_double_or_divide (x)
+  (cond ((and (oddp x) (plusp x)) (* x x))
+        ((and (oddp x) (minusp x)) (* x 2))
+        (t (/ x 2))))
+
+;;;4.17
+(defun sex_agep (sex stage)
+  (or (and (or (equal sex 'boy) (equal sex 'girl)) (equal stage 'child))
+        (and (or (equal sex 'man) (equal sex 'woman)) (equal stage 'adult))))
+
+;;;4.18
+(defun play (p1 p2)
+  (cond ((or(and (equal p1 'rock)(equal p2 'scissors))
+            (and (equal p1 'paper)(equal p2 'rock))
+            (and (equal p1 'scissors)(equal p2 'paper)))  'first-wins)
+        ((or(and (equal p2 'rock)(equal p1 'scissors))
+            (and (equal p2 'paper)(equal p1 'rock))
+            (and (equal p2 'scissors)(equal p1 'paper))) 'second-wins)
+      (t 'tie)))
+
+;;;4.19
