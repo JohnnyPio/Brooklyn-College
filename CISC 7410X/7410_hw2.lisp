@@ -224,4 +224,50 @@
 ;;;5.5. Yes, LET and LET* are equivalent when only setting 1 local variable as there are no possible dependent variables.
 
 ;;;5.6.
+;;5.6a.
+(defun throw-die ()
+  (+ 1 (random 6)))
 
+;;5.6b.
+(defun throw-dice ()
+  (list (throw-die) (throw-die)))
+
+;;5.6c.
+(defun snake-eyes-p (throw)
+  (equal throw '(1 1)))
+
+(defun boxcars-p (throw)
+  (equal throw '(6 6)))
+
+;;5.6d.
+(defun sum-throw (throw)
+  (+ (first throw) (second throw)))
+
+(defun instant-win-p (throw)
+  (if (member (sum-throw throw) '(7 11)) t))
+
+(defun instant-loss-p (throw)
+  (if (member (sum-throw throw) '(2 3 12)) t))
+
+;;5.6e.
+ (defun say-throw (throw)
+   (or (if (snake-eyes-p throw) 'snake-eyes)
+       (if (boxcars-p throw) 'boxcars)
+       (sum-throw throw)))
+
+;;5.6f.
+(defun craps ()
+  (let ((throw (throw-dice)))
+  (list 'throw (first throw) 'and (second throw) '-- (say-throw throw) '--)
+    (if (instant-win-p throw) 'you-win
+        (if (instant-loss-p throw) 'you-lose
+            (list 'your 'point 'is (sum-throw throw))))))
+
+;;5.6g.
+(defun try-for-point (point)
+  (let* ((throw (throw-dice))
+         (val (sum-throw throw)))
+     (list ’throw (first throw) 'and (second throw) ’-- (say-throw throw) ’--)
+     (cond ((equal val point) '(you win))
+           ((equal val 7) '(you lose))
+           (t ’more))))
