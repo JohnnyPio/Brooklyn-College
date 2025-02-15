@@ -158,3 +158,63 @@
       (t 'tie)))
 
 ;;;4.19
+;; Commenting the below expressions to not break the compiler
+;; (cond ((not x) nil)
+;;       ((not y) nil)
+;;       ((not z) nil)
+;;       (t w))
+
+;; (if x
+;;     (if y
+;;         (if z w)))
+
+;;;4.20
+;; (defun compare (x y)
+;;   (cond ((equal x y) ’numbers-are-the-same)
+;;         ((< x y) ’first-is-smaller)
+;;         ((> x y) ’first-is-bigger)))
+
+(defun compare-ifs (x y)
+  (if (equal x y) 'numbers-are-the-same
+      (if (< x y) 'first-is-smaller 'first-is-bigger)))
+
+(defun compare-and-or (x y)
+ (or (and (equal x y) 'numbers-are-the-same)
+     (and (< x y) 'first-is-smaller)
+     'first-is-bigger))
+
+;;;4.21
+;; (defun gtest (x y)
+;;   (or (> x y)
+;;       (zerop x)
+;;       (zerop y)))
+
+(defun gtest-if (x y)
+  (if (> x y) t
+      (if (zerop x) t (zerop y))))
+
+(defun gtest-cond (x y)
+  (cond ((> x y) t)
+        ((zerop x) t)
+        (t (zerop y))))
+
+;;; 4.22
+(defun boilingp-cond (temp scale) 
+  (cond ((equal scale 'fahrenheit) (>= temp 212))
+        ((equal scale 'celsius) (>= temp 100))
+        (t nil)))
+
+(defun boilingp-ifs (temp scale)
+  (if (equal scale 'fahrenheit) (> temp 212))
+  (if (equal scale 'celsius) (> temp 100) nil))
+
+(defun boilingp-or-and (temp scale)
+  (or (and (> temp 212) (equal scale 'fahrenheit))
+      (and (> temp 100) (equal scale 'celsius))))
+
+;;;4.23
+;; If WHERE-IS has 8 CONDs, it will need 7 IFs. WHERE-IS-3 will need 1 OR and 7 ANDs.
+
+
+;;;;;;;;;;;;;;;;;;
+;;;5.2
