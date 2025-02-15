@@ -68,3 +68,42 @@
 ;; (VERY VERY LONG DAY)
 
 ;;;4.9 
+;; (defun make-odd (x)
+;;   (cond (t x)
+;;         ((not (oddp x)) (+ x 1))))
+
+;; CL-USER> (make-odd 3)
+;; 3
+;; CL-USER> (make-odd -2)
+;; -2
+;; CL-USER> (make-odd  4)
+;; 5
+;; This function had the clauses in the wrong order 
+
+(defun make-odd (x)
+  (cond ((not (oddp x)) (+ x 1))
+        (t x)))
+
+;;;4.10
+(defun constraint (x min max)
+  (cond ((< x min) min)
+        ((> x max) max)
+        (t x)))
+
+(defun constraint-ifs (x min max)
+  (if (< x min) min x)
+   (if (> x max) max x))
+
+;;;4.11
+(defun firstzero (x)
+  (cond ((zerop (first x)) 'first)
+        ((zerop (second x)) 'second)
+        ((zerop (third x)) 'third)
+        (t 'none)))
+;;(firstzero 3 0 4) -> invalid number of arguments: 3
+
+;;;4.12
+(defun cycle (x)
+  (if (equal x 99) 1 (+ x 1)))
+
+;;;4.13
