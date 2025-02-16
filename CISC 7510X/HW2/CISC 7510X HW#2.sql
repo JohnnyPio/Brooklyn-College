@@ -25,17 +25,35 @@ SET search_path = main, "$user", public;
 -- from users_entering_2, users_exiting_2
 
 -- 3.
+-- with users_entering_frontandback as (
+-- 	select count(username) as count_users
+-- 	from doorlog
+-- 	where event = 'E'
+-- 		and doorid in (2, 3)
+-- ),
+-- users_exiting_frontandback as(
+-- 	select count(username) as count_users
+-- 	from doorlog
+-- 	where event = 'X'
+-- 		and doorid in (2, 3)
+-- )
+-- select users_entering_frontandback.count_users - users_exiting_frontandback.count_users
+-- from users_entering_frontandback, users_exiting_frontandback
+
+-- 4.
 with users_entering_frontandback as (
 	select count(username) as count_users
 	from doorlog
 	where event = 'E'
 		and doorid in (2, 3)
+		and tim <= '2024-07-04 22:00:00'
 ),
 users_exiting_frontandback as(
 	select count(username) as count_users
 	from doorlog
 	where event = 'X'
 		and doorid in (2, 3)
+		and tim <= '2024-07-04 22:00:00'
 )
 select users_entering_frontandback.count_users - users_exiting_frontandback.count_users
 from users_entering_frontandback, users_exiting_frontandback
