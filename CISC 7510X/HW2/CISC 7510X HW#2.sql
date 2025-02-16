@@ -9,17 +9,33 @@ SET search_path = main, "$user", public;
 -- 	and doorid = 1
 
 -- 2.
-with users_entering_2 as (
+-- with users_entering_2 as (
+-- 	select count(username) as count_users
+-- 	from doorlog
+-- 	where event = 'E'
+-- 		and doorid = 2
+-- ),
+-- users_exiting_2 as(
+-- 	select count(username) as count_users
+-- 	from doorlog
+-- 	where event = 'X'
+-- 		and doorid = 2
+-- )
+-- select users_entering_2.count_users - users_exiting_2.count_users
+-- from users_entering_2, users_exiting_2
+
+-- 3.
+with users_entering_frontandback as (
 	select count(username) as count_users
 	from doorlog
 	where event = 'E'
-		and doorid = 2
+		and doorid in (2, 3)
 ),
-users_exiting_2 as(
+users_exiting_frontandback as(
 	select count(username) as count_users
 	from doorlog
 	where event = 'X'
-		and doorid = 2
+		and doorid in (2, 3)
 )
-select users_entering_2.count_users - users_exiting_2.count_users
-from users_entering_2, users_exiting_2
+select users_entering_frontandback.count_users - users_exiting_frontandback.count_users
+from users_entering_frontandback, users_exiting_frontandback
