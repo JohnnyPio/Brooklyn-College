@@ -264,6 +264,7 @@
             (list 'your 'point 'is (sum-throw throw))))))
 
 ;;5.6g.
+;; This gave me much trouble - lots of warnings when compiling
 (defun try-for-point (point)
   (let* ((throw (throw-dice))
          (val (sum-throw throw)))
