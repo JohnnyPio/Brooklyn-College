@@ -59,36 +59,56 @@ SET search_path = main, "$user", public;
 -- from users_entering_frontandback, users_exiting_frontandback;
 
 -- 5.
-with all_days_2021 as (
-	select generate_series('2021-01-01'::date, '2021-12-31'::date, '1 day') as everyday
-),
-users_entering_floor42 as (
-	select 
-		count(username) as count_users,
-		date(tim) as event_day
+-- @TODO fix
+-- with all_days_2021 as (
+-- 	select generate_series('2021-01-01'::date, '2021-12-31'::date, '1 day') as everyday
+-- ),
+-- users_entering_floor42 as (
+-- 	select 
+-- 		count(username) as count_users,
+-- 		date(tim) as event_day
+-- 	from doorlog
+-- 	where event = 'E'
+-- 		and doorid  = 7
+-- 		and tim >= '2021-01-01 00:00:00'
+-- 		and tim < '2022-01-01 00:00:00'
+-- 	group by DATE(tim)
+-- ),
+-- users_exiting_floor42 as(
+-- 	select 
+-- 		count(username) as count_users,
+-- 		date(tim) as event_day
+-- 	from doorlog
+-- 	where event = 'X'
+-- 		and doorid  = 7
+-- 		and tim >= '2021-01-01 00:00:00'
+-- 		and tim < '2022-01-01 00:00:00'
+-- 	group by DATE(tim)
+-- )
+-- select 
+-- 	all_days_2021.everyday,
+-- 	users_entering_floor42.count_users,
+-- 	users_exiting_floor42.count_users,
+-- 	coalesce(users_entering_floor42.count_users, 0) - coalesce(users_exiting_floor42.count_users, 0),
+-- 	from all_days_2021
+-- 	left join users_entering_floor42 on all_days_2021.everyday = users_entering_floor42.event_day
+-- 	left join users_exiting_floor42 on all_days_2021.everyday = users_exiting_floor42.event_day
+
+-- 6.
+
+
+-- 7.
+with users_entering_floor42 as (
+	select username
 	from doorlog
 	where event = 'E'
-		and doorid  = 7
-		and tim >= '2021-01-01 00:00:00'
-		and tim < '2022-01-01 00:00:00'
-	group by DATE(tim)
+		and doorid  = 2
 ),
-users_exiting_floor42 as(
-	select 
-		count(username) as count_users,
-		date(tim) as event_day
+all_users as (
+	select username
 	from doorlog
-	where event = 'X'
-		and doorid  = 7
-		and tim >= '2021-01-01 00:00:00'
-		and tim < '2022-01-01 00:00:00'
-	group by DATE(tim)
 )
-select 
-	all_days_2021.everyday,
-	users_entering_floor42.count_users,
-	users_exiting_floor42.count_users,
-	coalesce(users_entering_floor42.count_users, 0) - coalesce(users_exiting_floor42.count_users, 0),
-	from all_days_2021
-	left join users_entering_floor42 on all_days_2021.everyday = users_entering_floor42.event_day
-	left join users_exiting_floor42 on all_days_2021.everyday = users_exiting_floor42.event_day
+select
+	100 * count(distinct users_entering_floor42.username)/count(distinct all_users.username)
+from all_users
+left join users_entering_floor42 on all_users.username = users_entering_floor42.username
