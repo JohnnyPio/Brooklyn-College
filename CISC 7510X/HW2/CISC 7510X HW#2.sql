@@ -25,6 +25,7 @@ SET search_path = main, "$user", public;
 -- from users_entering_2, users_exiting_2;
 
 -- 3.
+-- --I assumed that I didn't need to filter the timestamp on the current day and could just use all-time numbers to get the final calcs.
 -- with users_entering_frontandback as (
 -- 	select count(username) as count_users
 -- 	from doorlog
@@ -46,6 +47,7 @@ SET search_path = main, "$user", public;
 -- 	from doorlog
 -- 	where event = 'E'
 -- 		and doorid in (1, 3)
+-- -- assuming July 4th, 2024 here
 -- 		and tim <= '2024-07-04 22:00:00'
 -- ),
 -- users_exiting_frontandback as(
@@ -138,7 +140,7 @@ SET search_path = main, "$user", public;
 -- 	from doorlog
 -- 	where event = 'X'
 -- 		and doorid in (1, 3)
--- 		and tim > '2024-07-03 17:15:00'
+-- 		and tim > '2022-07-03 17:15:00'
 -- ),
 -- calculations as (
 -- 	select 
@@ -151,18 +153,10 @@ SET search_path = main, "$user", public;
 -- from calculations
 
 -- 10.
-with users_exiting_work_before_1 as(
-	select username
-	from doorlog
-	where event = 'X'
-		and doorid in (2, 3)
-		and tim >= '2024-07-03 12:00:00'
-),
-users_at_work_on_july_3rd as(
-	select username
-	from doorlog
-	where event = 'E'
-		and doorid in (2, 3)
-		and tim >= '2024-07-03 00:00:00'
-		and tim <
-),
+-- select 
+-- 	username
+-- from doorlog
+-- where event = 'X'
+-- 	and doorid in (7)
+-- 	and tim < '2021-01-10 17:30:00'
+-- 	and tim >= '2021-01-10 00:00:00'
