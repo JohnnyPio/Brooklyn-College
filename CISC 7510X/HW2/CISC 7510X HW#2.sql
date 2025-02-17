@@ -98,17 +98,54 @@ SET search_path = main, "$user", public;
 
 
 -- 7.
-with users_entering_floor42 as (
-	select username
+-- with all_users_entering_floor42 as (
+-- 	select username
+-- 	from doorlog
+-- 	where event = 'E'
+-- 		and doorid  = 2
+-- ),
+-- all_users as (
+-- 	select username
+-- 	from doorlog
+-- )
+-- select
+-- 	100 * count(distinct all_users_entering_floor42.username)/count(distinct all_users.username)
+-- from all_users
+-- left join all_users_entering_floor42 on all_users.username = all_users_entering_floor42.username;
+
+-- 8.
+-- with users_entering_bathroom as (
+-- 	select 
+-- 		username,
+-- 		tim
+-- 	from doorlog
+-- 	where event = 'E'
+-- 		and doorid  = 2
+-- ),
+-- calculations as (
+-- 	select 
+-- 		cast(count(username) as decimal(18,8)) as total_users_dec,
+-- 		cast(count(distinct username) as decimal(18,8)) as total_distinct_users_dec,
+-- 		cast(count(distinct DATE(tim)) as decimal(18,8)) as total_distinct_dates_dec
+-- 	from users_entering_bathroom
+-- )
+-- select cast(total_users_dec/total_distinct_users_dec/total_distinct_dates_dec as decimal(18,8))
+-- from calculations;
+
+-- 9.
+with users_entering_frontandback as (
+	select count(username) as count_users
 	from doorlog
 	where event = 'E'
-		and doorid  = 2
+		and doorid in (2, 3)
+		and tim <= '2024-07-03 22:00:00'
 ),
-all_users as (
-	select username
+users_exiting_frontandback_after_515 as(
+	select count(username) as count_users
 	from doorlog
+	where event = 'X'
+		and doorid in (2, 3)
+		and tim >= '2024-07-03 17:15:00'
 )
-select
-	100 * count(distinct users_entering_floor42.username)/count(distinct all_users.username)
-from all_users
-left join users_entering_floor42 on all_users.username = users_entering_floor42.username
+select users_entering_frontandback.count_users - users_exiting_frontandback_after_515.count_users
+from users_entering_frontandback, users_exiting_frontandback_after_515;
