@@ -29,13 +29,13 @@ SET search_path = main, "$user", public;
 -- 	select count(username) as count_users
 -- 	from doorlog
 -- 	where event = 'E'
--- 		and doorid in (2, 3)
+-- 		and doorid in (1, 3)
 -- ),
 -- users_exiting_frontandback as(
 -- 	select count(username) as count_users
 -- 	from doorlog
 -- 	where event = 'X'
--- 		and doorid in (2, 3)
+-- 		and doorid in (1, 3)
 -- )
 -- select users_entering_frontandback.count_users - users_exiting_frontandback.count_users
 -- from users_entering_frontandback, users_exiting_frontandback;
@@ -45,14 +45,14 @@ SET search_path = main, "$user", public;
 -- 	select count(username) as count_users
 -- 	from doorlog
 -- 	where event = 'E'
--- 		and doorid in (2, 3)
+-- 		and doorid in (1, 3)
 -- 		and tim <= '2024-07-04 22:00:00'
 -- ),
 -- users_exiting_frontandback as(
 -- 	select count(username) as count_users
 -- 	from doorlog
 -- 	where event = 'X'
--- 		and doorid in (2, 3)
+-- 		and doorid in (1, 3)
 -- 		and tim <= '2024-07-04 22:00:00'
 -- )
 -- select users_entering_frontandback.count_users - users_exiting_frontandback.count_users
@@ -102,7 +102,7 @@ SET search_path = main, "$user", public;
 -- 	select username
 -- 	from doorlog
 -- 	where event = 'E'
--- 		and doorid  = 2
+-- 		and doorid  = 7
 -- ),
 -- all_users as (
 -- 	select username
@@ -129,23 +129,40 @@ SET search_path = main, "$user", public;
 -- 		cast(count(distinct DATE(tim)) as decimal(18,8)) as total_distinct_dates_dec
 -- 	from users_entering_bathroom
 -- )
--- select cast(total_users_dec/total_distinct_users_dec/total_distinct_dates_dec as decimal(18,8))
+-- select cast(total_users_dec/total_distinct_users_dec/total_distinct_dates_dec as decimal(18,8)) as avg_bath_trips_per_day_per_person
 -- from calculations;
 
 -- 9.
-with users_entering_frontandback as (
-	select count(username) as count_users
-	from doorlog
-	where event = 'E'
-		and doorid in (2, 3)
-		and tim <= '2024-07-03 22:00:00'
-),
-users_exiting_frontandback_after_515 as(
-	select count(username) as count_users
+-- with users_exiting_frontandback_after_515 as(
+-- 	select username
+-- 	from doorlog
+-- 	where event = 'X'
+-- 		and doorid in (1, 3)
+-- 		and tim > '2024-07-03 17:15:00'
+-- ),
+-- calculations as (
+-- 	select 
+-- 		cast(count(distinct doorlog.username) as decimal(18,8)) as total_employees,
+-- 		cast(count(distinct users_exiting_frontandback_after_515.username) as decimal(18,8)) as total_employees_staying_late
+-- 	from doorlog
+-- 	full outer join users_exiting_frontandback_after_515 on doorlog.username = users_exiting_frontandback_after_515.username
+-- )
+-- select total_employees_staying_late/total_employees * 100
+-- from calculations
+
+-- 10.
+with users_exiting_work_before_1 as(
+	select username
 	from doorlog
 	where event = 'X'
 		and doorid in (2, 3)
-		and tim >= '2024-07-03 17:15:00'
-)
-select users_entering_frontandback.count_users - users_exiting_frontandback_after_515.count_users
-from users_entering_frontandback, users_exiting_frontandback_after_515;
+		and tim >= '2024-07-03 12:00:00'
+),
+users_at_work_on_july_3rd as(
+	select username
+	from doorlog
+	where event = 'E'
+		and doorid in (2, 3)
+		and tim >= '2024-07-03 00:00:00'
+		and tim <
+),
