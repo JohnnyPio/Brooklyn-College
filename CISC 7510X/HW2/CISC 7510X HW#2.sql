@@ -141,6 +141,7 @@ SET search_path = main, "$user", public;
 -- 	where event = 'X'
 -- 		and doorid in (1, 3)
 -- 		and tim > '2022-07-03 17:15:00'
+-- 		and tim < '2022-07-04 00:00:00'
 -- ),
 -- calculations as (
 -- 	select 
