@@ -109,11 +109,17 @@ SET search_path = main, "$user", public;
 -- all_users as (
 -- 	select username
 -- 	from doorlog
+-- ),
+-- calculations as (
+-- 	select
+-- 		cast(count(distinct all_users_entering_floor42.username) as decimal(18,8)) as distinct_floor_42_users,
+-- 		cast(count(distinct all_users.username) as decimal(18,8)) as all_users
+-- 	from all_users
+-- 	left join all_users_entering_floor42 on all_users.username = all_users_entering_floor42.username
 -- )
--- select
--- 	100 * count(distinct all_users_entering_floor42.username)/count(distinct all_users.username)
--- from all_users
--- left join all_users_entering_floor42 on all_users.username = all_users_entering_floor42.username;
+-- select 100 * distinct_floor_42_users/all_users
+-- from calculations;
+
 
 -- 8.
 -- with users_entering_bathroom as (
@@ -131,7 +137,8 @@ SET search_path = main, "$user", public;
 -- 		cast(count(distinct DATE(tim)) as decimal(18,8)) as total_distinct_dates_dec
 -- 	from users_entering_bathroom
 -- )
--- select cast(total_users_dec/total_distinct_users_dec/total_distinct_dates_dec as decimal(18,8)) as avg_bath_trips_per_day_per_person
+-- select 
+-- 	cast(total_users_dec/total_distinct_users_dec/total_distinct_dates_dec as decimal(18,8)) as avg_bath_trips_per_day_per_person
 -- from calculations;
 
 -- 9.
@@ -151,7 +158,7 @@ SET search_path = main, "$user", public;
 -- 	full outer join users_exiting_frontandback_after_515 on doorlog.username = users_exiting_frontandback_after_515.username
 -- )
 -- select total_employees_staying_late/total_employees * 100
--- from calculations
+-- from calculations;
 
 -- 10.
 -- select 
@@ -160,4 +167,4 @@ SET search_path = main, "$user", public;
 -- where event = 'X'
 -- 	and doorid in (7)
 -- 	and tim < '2021-01-10 17:30:00'
--- 	and tim >= '2021-01-10 00:00:00'
+-- 	and tim >= '2021-01-10 00:00:00';
