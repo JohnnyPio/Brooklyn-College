@@ -264,11 +264,17 @@
             (list 'your 'point 'is (sum-throw throw))))))
 
 ;;5.6g.
-;; This gave me much trouble - lots of warnings when compiling
+;; This gave me much trouble - lots of warnings when compiling on line 273
 (defun try-for-point (point)
   (let* ((throw (throw-dice))
          (val (sum-throw throw)))
-     (list ’throw (first throw) 'and (second throw) ’-- (say-throw throw) ’--)
+    (append 
+     (list ’throw (first throw)
+                   'and (second throw) 
+                   ’-- 
+                    (say-throw throw) 
+                    ’--)
      (cond ((equal val point) '(you win))
            ((equal val 7) '(you lose))
-           (t ’more))))
+           (t '(throw again)
+            )))))
