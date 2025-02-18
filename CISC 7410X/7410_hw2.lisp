@@ -1,5 +1,5 @@
 ;John Piotrowski - 7410x - HW2
-;4.1-4.23, 5.2-5.7
+;4.1-4.23, 5.2-5.6
 
 ;;; 4.1
 (defun make-even (x)
