@@ -9,6 +9,7 @@ SET search_path = main, "$user", public;
 -- 	and doorid = 1;
 
 -- 2.
+-- --I assumed that I didn't need to filter the timestamp on the current day and could just use all-time numbers to get the final calcs.
 -- with users_entering_2 as (
 -- 	select count(username) as count_users
 -- 	from doorlog
@@ -42,12 +43,12 @@ SET search_path = main, "$user", public;
 -- from users_entering_frontandback, users_exiting_frontandback;
 
 -- 4.
+-- -- assuming July 4th, 2024 
 -- with users_entering_frontandback as (
 -- 	select count(username) as count_users
 -- 	from doorlog
 -- 	where event = 'E'
 -- 		and doorid in (1, 3)
--- -- assuming July 4th, 2024 here
 -- 		and tim <= '2024-07-04 22:00:00'
 -- ),
 -- users_exiting_frontandback as(
@@ -61,43 +62,46 @@ SET search_path = main, "$user", public;
 -- from users_entering_frontandback, users_exiting_frontandback;
 
 -- 5.
--- @TODO fix
+-- Added exits in case of users occupying overnight
 -- with all_days_2021 as (
 -- 	select generate_series('2021-01-01'::date, '2021-12-31'::date, '1 day') as everyday
 -- ),
 -- users_entering_floor42 as (
 -- 	select 
--- 		count(username) as count_users,
--- 		date(tim) as event_day
+-- 		username,
+-- 		tim
 -- 	from doorlog
 -- 	where event = 'E'
 -- 		and doorid  = 7
 -- 		and tim >= '2021-01-01 00:00:00'
 -- 		and tim < '2022-01-01 00:00:00'
--- 	group by DATE(tim)
 -- ),
 -- users_exiting_floor42 as(
 -- 	select 
--- 		count(username) as count_users,
--- 		date(tim) as event_day
+-- 		username,
+-- 		tim
 -- 	from doorlog
 -- 	where event = 'X'
 -- 		and doorid  = 7
 -- 		and tim >= '2021-01-01 00:00:00'
 -- 		and tim < '2022-01-01 00:00:00'
--- 	group by DATE(tim)
--- )
--- select 
--- 	all_days_2021.everyday,
--- 	users_entering_floor42.count_users,
--- 	users_exiting_floor42.count_users,
--- 	coalesce(users_entering_floor42.count_users, 0) - coalesce(users_exiting_floor42.count_users, 0),
+-- ),
+-- calculations as (
+-- 	select
+-- 	all_days_2021.everyday as all_days,
+-- 	(count(distinct users_entering_floor42.username)+count(distinct users_exiting_floor42.username))/2 as average_occupancy
 -- 	from all_days_2021
--- 	left join users_entering_floor42 on all_days_2021.everyday = users_entering_floor42.event_day
--- 	left join users_exiting_floor42 on all_days_2021.everyday = users_exiting_floor42.event_day
-
+-- 	left join users_entering_floor42 on all_days_2021.everyday = date(users_entering_floor42.tim)
+-- 	left join users_exiting_floor42 on all_days_2021.everyday = date(users_exiting_floor42.tim)	
+-- 	group by all_days
+-- )
+-- select all_days, average_occupancy
+-- from calculations
 -- 6.
-
+-- select 
+-- 	sum(average_occupancy)/count(all_days) as avg_daily_occupancy,
+-- 	stddev(average_occupancy)
+-- from calculations
 
 -- 7.
 -- with all_users_entering_floor42 as (
