@@ -143,4 +143,28 @@
            (set-difference set subset)
            ) t nil))
 
-;;;6.26
+;;;6.26a
+(defun right-side (list)
+  (rest (member '-vs- list))
+  )
+
+;;;6.26b
+(defun left-side (list)
+  (reverse  (rest (member '-vs- (reverse list))))
+  )
+
+;;;6.26c
+(defun count-common (list)
+  (length (intersection (left-side list) (right-side list)))
+  )
+
+;;;6.26d
+(defun compare (list)
+  (list (count-common list) 'COMMON 'FEATURES)
+  )
+
+;;;6.26e
+;; CL-USER> (compare '(small red metal cube -vs- red plastic small cube))
+;; (3 COMMON FEATURES)
+
+;;; 6.27.
