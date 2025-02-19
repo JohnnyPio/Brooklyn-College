@@ -78,3 +78,25 @@
 ;;;6.14. The result is the set itself.
 
 ;;;6.15. 
+(defun contains-articlep-inter (sent)
+  (not (equal (intersection sent '(the a an)) nil)))
+; ^^ Whoops forgot that everything is T besides NIL, didn't need the not and equal but leaving it for now :)
+
+ 
+(defun contains-articlep-member-or (sent)
+  (or (member 'the sent)
+      (member 'a sent)
+      (member 'an sent)
+      ))
+
+;; Yes, you could solve this problem with NOT/AND with 3 clauses using NOT statements.
+
+;;;6.16. The result is the set.
+
+;;;6.17. The result is the set.
+
+;;;6.18. 
+
+
+
+
