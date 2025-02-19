@@ -167,6 +167,7 @@
 ;;         (if z w)))
 
 ;;;4.20
+;; Commented to avoid name conflicts in 4.5
 ;; (defun compare (x y)
 ;;   (cond ((equal x y) ’numbers-are-the-same)
 ;;         ((< x y) ’first-is-smaller)
@@ -182,10 +183,10 @@
      'first-is-bigger))
 
 ;;;4.21
-;; (defun gtest (x y)
-;;   (or (> x y)
-;;       (zerop x)
-;;       (zerop y)))
+(defun gtest (x y)
+  (or (> x y)
+      (zerop x)
+      (zerop y)))
 
 (defun gtest-if (x y)
   (if (> x y) t
@@ -215,7 +216,7 @@
 
 
 ;;;;;; CHAPTER 5
-;;;5.2. Actions functions take besides returning a value, such as changing the value of a variable.
+;;;5.2. Side effects are actions functions take besides returning a value, such as changing the value of a variable.
 
 ;;;5.3. A global variable is not local to any specific function and is accessible everywhere. A local variable is a variable who's scope is restricted to the body of a function.
 
