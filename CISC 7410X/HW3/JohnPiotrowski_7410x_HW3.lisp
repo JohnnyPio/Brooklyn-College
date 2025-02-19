@@ -9,9 +9,27 @@
 
 ;;;6.4. (LAST '((A B C))) returns ((A B C)) because there is only 1 top-level list element and the last of that list returns that element.
 
+;;;6.5.
+;(setf line '(ROSES ARE RED))
+;; CL-USER> (reverse line)
+;; (RED ARE ROSES)
+;; CL-USER> (first (last line))
+;; RED
+;; CL-USER> (nth 1 line)
+;; ARE
+;; CL-USER> (reverse (reverse line))
+;; (ROSES ARE RED)
+;; CL-USER> (append line (list (first line)))
+;; (ROSES ARE RED ROSES)
+;; CL-USER> (append (last line) line)
+;; (RED ROSES ARE RED)
+;; CL-USER> (list (first line) (last line))
+;; (ROSES (RED))
+;; CL-USER> (cons (last line) line)
+;; ((RED) ROSES ARE RED)
+;; CL-USER> (remove 'are line)
+;; (ROSES RED)
+;; CL-USER> (append line '(violets are blue))
+;; (ROSES ARE RED VIOLETS ARE BLUE)
 
-
-
-
-
-
+;;;6.6.
