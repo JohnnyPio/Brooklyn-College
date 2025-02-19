@@ -33,3 +33,15 @@
 ;; (ROSES ARE RED VIOLETS ARE BLUE)
 
 ;;;6.6.
+(defun last-element (list)
+  (first (last list))
+  )
+
+(defun last-element-rev (list)
+  (first (reverse list))
+  )
+
+(defun last-element-nth-len (list)
+  (nth (- (length list) 1) list))
+
+;;;6.7.
