@@ -105,8 +105,32 @@
 ;;;6.20. set-difference copies it's first input, it never needs to copy the second. It copies the first input and removes the elements of that set contained in the second set.
 
 ;;;6.21
+(defun my-subsetp (x y)
+  (not (set-difference x y))
+  )
 
+;;;6.22
+;; (setf a '(soap water))
+;; (SOAP WATER)
+;; CL-USER> a
+;; (SOAP WATER)
+;; CL-USER> (union a '(no soap radio))
+;; (RADIO NO SOAP WATER)
+;; CL-USER> (intersection a (reverse a))
+;; (WATER SOAP)
+;; CL-USER> (set-difference a '(stop for water))
+;; (SOAP)
+;; CL-USER> (set-difference a a)
+;; NIL
+;; CL-USER> (member 'soap a)
+;; (SOAP WATER)
+;; CL-USER> (member 'water a)
+;; (WATER)
+;; CL-USER> (member 'washcloth a)
+;; NIL
 
+;;;6.23. LENGTH determines the cardinality of a set.
 
+;;;6.24. 
 
 
