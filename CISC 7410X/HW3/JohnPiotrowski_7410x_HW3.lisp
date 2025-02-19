@@ -62,8 +62,14 @@
 ;; It reduces to first.
 
 ;;;6.10
+(defun palindromep (list)
+  (equal (reverse list) list)
+  )
 
-
+;;;6.11
+(defun make-palindrome (list)
+  (append list (reverse list))
+  )
 
 
 
