@@ -138,5 +138,9 @@
   )
 
 ;;;6.25.
+(defun proper-subsetp (subset set)
+  (if (and (subsetp subset set)
+           (set-difference set subset)
+           ) t nil))
 
-
+;;;6.26
