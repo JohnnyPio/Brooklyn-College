@@ -54,4 +54,17 @@
   (and (rest list)
   (nth (- (length list) 2) list)))
 
+;;;6.8
+(defun my-butlast (list)
+  (remove (first (reverse list)) list))
+
+;;;6.9
+;; It reduces to first.
+
+;;;6.10
+
+
+
+
+
 
