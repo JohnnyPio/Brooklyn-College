@@ -95,7 +95,17 @@
 
 ;;;6.17. The result is the set.
 
-;;;6.18. 
+;;;6.18.
+(defun add-vowels (set)
+  (union set '(a e i o u))
+  )
+
+;;;6.19. If NIL is the first input, set-difference will return NIL. If NIL is the second input, it will return the first set.
+
+;;;6.20. set-difference copies it's first input, it never needs to copy the second. It copies the first input and removes the elements of that set contained in the second set.
+
+;;;6.21
+
 
 
 
