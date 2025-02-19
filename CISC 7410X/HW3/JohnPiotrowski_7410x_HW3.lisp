@@ -42,6 +42,16 @@
   )
 
 (defun last-element-nth-len (list)
-  (nth (- (length list) 1) list))
+  (and list 
+  (nth (- (length list) 1) list)))
 
 ;;;6.7.
+(defun next-to-last-rev (list)
+  (second (reverse list))
+  )
+
+(defun next-to-last-nth (list)
+  (and (rest list)
+  (nth (- (length list) 2) list)))
+
+
