@@ -167,4 +167,16 @@
 ;; CL-USER> (compare '(small red metal cube -vs- red plastic small cube))
 ;; (3 COMMON FEATURES)
 
-;;; 6.27.
+;;; 6.27. If MEMBER is considered a predicate than ASSOC should be too. While it doesn't return T if the condition is met it does return a true value like MEMBER.
+
+;;;6.28.
+;; CL-USER> (assoc 'banana produce)
+;; (BANANA . FRUIT)
+;; CL-USER> (rassoc 'fruit produce)
+;; (APPLE . FRUIT)
+;; CL-USER> (assoc 'lettuce produce)
+;; (LETTUCE . VEGGIE)
+;; CL-USER> (rassoc 'veggie produce)
+;; (CELERY . VEGGIE)
+
+;;;6.29
