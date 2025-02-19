@@ -131,6 +131,12 @@
 
 ;;;6.23. LENGTH determines the cardinality of a set.
 
-;;;6.24. 
+;;;6.24.
+(defun set-equal (set1 set2)
+  (and (not (set-difference set1 set2))
+       (not (set-difference set1 set2)))
+  )
+
+;;;6.25.
 
 
