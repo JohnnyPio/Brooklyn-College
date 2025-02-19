@@ -71,6 +71,10 @@
   (append list (reverse list))
   )
 
+;;;6.12. No member doesn't copy its input as it returns either NIL or  a pointer to the list element(s).
 
+;;;6.13. The result is NIL.
 
+;;;6.14. The result is the set itself.
 
+;;;6.15. 
