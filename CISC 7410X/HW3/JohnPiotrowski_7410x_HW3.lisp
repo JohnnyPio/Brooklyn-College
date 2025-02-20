@@ -204,4 +204,28 @@
 ;;         (new-jersey (newark princeton trenton))
 ;;         (ohio (columbus))))
 
-;;;6.35.
+;;;6.35a. A table would be the best way to represent and easily visualize this data.
+;;I would usually use setf but it doesn't work within the context of this lisp file, only on the slime-repl sbcl
+(defvar nerd-states
+  '((sleeping   . eating)
+    (eating     . waiting)
+    (waiting    . programming)
+    (programming. debugging)
+    (debugging  . sleeping)))
+
+;;;6.35b.
+(defun nerdus (state)
+  (rest (assoc state nerd-states))
+  )
+
+;;;6.35c. (NERDUS ’PLAYING-GUITAR) => NIL
+
+;;;6.35d.
+(defun sleepless-nerd (state)
+  (let ((x (nerdus state)))
+    (if (equal x 'sleeping)
+        (nerdus x)
+        x)))
+
+;;;6.35e.
+
