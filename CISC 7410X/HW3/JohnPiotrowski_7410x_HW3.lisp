@@ -179,4 +179,29 @@
 ;; CL-USER> (rassoc 'veggie produce)
 ;; (CELERY . VEGGIE)
 
-;;;6.29
+;;;6.29. LENGTH returns the number of entries in a table.
+
+;;;6.30
+;;I would usually use setf but it doesn't work within the context of this lisp file, only on the slime-repl sbcl
+(defvar books '((war-and-peace . leo-tolstoy) (angelas-ashes . frank-mccourt) (romeo-and-juliet . william-shakespeare) (catch-22 . joseph-heller) (the-scarlet-letter . nathaniel-hawthorne)))
+
+;;;6.31
+(defun who-wrote (name)
+  (rest (assoc name books))
+  )
+
+;;;6.32. If we do (SETF BOOKS (REVERSE BOOKS)), it will reverse the order of the list of books leaving the WHO-WROTE function unchanged.
+
+;;;6.33. No. WHAT-WROTE could be done using RASSOC and the current table.
+;; (defun what-wrote (name)
+;;   (first (rassoc name books))
+;;   )
+
+;;;6.34.
+;; Commenting to avoid compiling errors
+;; (setf redesigned-atlas
+;;       ’((pennsylvania (pittsburgh johnstown))
+;;         (new-jersey (newark princeton trenton))
+;;         (ohio (columbus))))
+
+;;;6.35.
