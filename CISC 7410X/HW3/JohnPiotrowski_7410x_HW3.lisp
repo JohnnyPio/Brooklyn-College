@@ -206,7 +206,7 @@
 
 ;;;6.35a. A table would be the best way to represent and easily visualize this data.
 ;;I would usually use setf but it doesn't work within the context of this lisp file, only on the slime-repl sbcl
-(defvar nerd-states
+(setf nerd-states
   '((sleeping   . eating)
     (eating     . waiting)
     (waiting    . programming)
@@ -215,7 +215,7 @@
 
 ;;;6.35b.
 (defun nerdus (state)
-  (rest (assoc state nerd-states))
+  (cdr (assoc state nerd-states))
   )
 
 ;;;6.35c. (NERDUS ’PLAYING-GUITAR) => NIL
@@ -227,5 +227,12 @@
         (nerdus x)
         x)))
 
-;;;6.35e.
+;;;6.35e
+(defun nerd-on-caffeine (state)
+  (nerdus(nerdus state)))
+
+;;;6.35f. It would go through3 state changes, programming -> sleeping, sleeping -> waiting, then waiting -> debugging.
+
+;;;6.36
+
 
