@@ -396,7 +396,22 @@
 
 ;;;7.7
 (defun flips-each (list)
-  (mapcar #'(lambda (x) (if (equal x 'up) 'down 'up))
+  (mapcar #'(lambda (x)
+              (if (equal x 'up) 'down 'up))
           list))
 
 ;;;7.8
+(defun rough-equal-to (element k)
+  (and (not (< element (- k 10)))
+       (not (> element (+ k 10))))
+  )
+
+(defun find-equal-k (x k)
+  (find-if #'(lambda (element) (rough-equal-to element k))
+           x))
+
+;;;7.9
+(defun find-nested (list)
+  (find-if #'listp list))
+
+;;;7.10
