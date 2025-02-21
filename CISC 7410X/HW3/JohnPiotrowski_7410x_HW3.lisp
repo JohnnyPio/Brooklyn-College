@@ -241,3 +241,22 @@
           (append b (list (first list_in))))))
 
 ;;;6.37
+(defun rotate-left  (list_in)
+  (append (rest list_in) (list (first list_in)))
+  )
+
+(defun rotate-right  (list_in)
+  (append (last list_in) (reverse (rest (reverse list_in))))
+  )
+
+;;;6.38. X=(A B C), Y=(C B A). X=(A B C D), Y=(D C B A). For unequal set differences, the sets must not be the same (e,g. X=(A B C) and Y=(A B))
+
+;;;6.39. APPEND performs unary addition.
+
+;;;6.40.
+;; ((A B C D)
+;;  (B C D)
+;;  (C D)
+;;  (D))
+
+;;;6.41.
