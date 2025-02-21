@@ -329,3 +329,35 @@
         '(OUCH! ROBBIE HIT A WALL))))
 
 ;;;6.41h
+;; CL-USER> loc
+;; PANTRY
+;; CL-USER> (move 'west)
+;; (ROBBIE IS DOWNSTAIRS IN THE DINING-ROOM)
+;; CL-USER> (move 'west)
+;; (ROBBIE IS DOWNSTAIRS IN THE DOWNSTAIRS-BEDROOM)
+;; CL-USER> (move 'north)
+;; (ROBBIE IS ON THE BACK-STAIRS)
+;; CL-USER> (move 'north)
+;; (ROBBIE IS UPSTAIRS IN THE LIBRARY)
+;; CL-USER> loc
+;; LIBRARY
+;; CL-USER> (move 'east)
+;; (ROBBIE IS UPSTAIRS IN THE UPSTAIRS-BEDROOM)
+;; CL-USER> (move 'south)
+;; (ROBBIE IS ON THE FRONT-STAIRS)
+;; CL-USER> (move 'south)
+;; (ROBBIE IS DOWNSTAIRS IN THE LIVING-ROOM)
+;; CL-USER> (move 'east)
+;; (ROBBIE IS DOWNSTAIRS IN THE KITCHEN)
+;; CL-USER> loc
+;; KITCHEN
+
+
+;;;6.42
+(defun royal-we (list)
+  (subst 'we 'i list)
+  )
+
+
+;;;;; CHAPTER 7
+
