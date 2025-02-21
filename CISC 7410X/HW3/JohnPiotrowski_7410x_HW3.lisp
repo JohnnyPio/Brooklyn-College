@@ -315,3 +315,17 @@
   )
 
 ;;;6.41f
+(defun where ()
+  (if (onstairsp loc) (list 'ROBBIE 'IS 'ON 'THE loc)
+  (if (upstairsp loc) (list 'ROBBIE 'IS 'UPSTAIRS 'IN 'THE loc)
+      (list 'ROBBIE 'IS 'DOWNSTAIRS 'IN 'THE loc))))
+
+
+;;;6.41g
+(defun move (dir)
+  (let ((new_loc (look dir loc)))
+    (if (not (equal new_loc nil))
+        (and (set-robbie-location new_loc) (where))
+        '(OUCH! ROBBIE HIT A WALL))))
+
+;;;6.41h
