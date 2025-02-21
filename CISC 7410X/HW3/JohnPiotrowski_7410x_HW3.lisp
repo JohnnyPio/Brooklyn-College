@@ -234,5 +234,10 @@
 ;;;6.35f. It would go through3 state changes, programming -> sleeping, sleeping -> waiting, then waiting -> debugging.
 
 ;;;6.36
+(defun swap-first-last (list_in)
+  (let* ((a (reverse (rest list_in)))       
+         (b (reverse (rest a))))
+    (cons (first a)
+          (append b (list (first list_in))))))
 
-
+;;;6.37
