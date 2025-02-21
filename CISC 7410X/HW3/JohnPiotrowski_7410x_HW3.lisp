@@ -260,7 +260,7 @@
 ;;  (D))
 
 ;;;6.41.
-(defvar rooms
+(setf rooms
              '((living-room (north front-stairs)
                             (south dining-room)
                             (east kitchen))
@@ -289,5 +289,14 @@
 
 ;;;6.41b
 (defun look (dir room)
-  ()
+  (second (assoc dir (choices room)))
   )
+
+;;;6.41c
+(setf loc 'pantry)
+
+(defun set-robbie-location (place)
+  "Moves Robbie to PLACE by setting the variable LOC."
+  (setf loc place))
+
+;;;6.41d
