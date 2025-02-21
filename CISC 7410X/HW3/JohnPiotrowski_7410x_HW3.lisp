@@ -376,3 +376,14 @@
 ;(mapcar #'third daily-planet) => (|123-76-4535| |089-52-6787| |951-26-1438| |355-16-7439|)         
 
 ;;;7.3
+; (mapcar #'zerop '(2 0 3 4 0 -5 -6)) => (NIL T NIL NIL T NIL NIL)
+
+;;;7.4
+(defun greater-than-five-p (num)
+  (> num 5)
+  )
+
+; (mapcar #'greater-than-five-p '(2 0 6 4 0 -5 -6)) => (NIL NIL T NIL NIL NIL NIL)
+
+
+
