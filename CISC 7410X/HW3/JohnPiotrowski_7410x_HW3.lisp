@@ -300,3 +300,18 @@
   (setf loc place))
 
 ;;;6.41d
+(defun how-many-choices ()
+  (length (choices loc))
+  )
+
+;;;6.41e
+(defun upstairsp (room)
+  (or (equal room 'library)
+      (equal room 'upstairs-bedroom)))
+
+(defun onstairsp (room)
+  (or (equal room 'front-stairs)
+      (equal room 'back-stairs))
+  )
+
+;;;6.41f
