@@ -385,5 +385,18 @@
 
 ; (mapcar #'greater-than-five-p '(2 0 6 4 0 -5 -6)) => (NIL NIL T NIL NIL NIL NIL)
 
+;;;7.5.
+(lambda (n) (- n 7))
 
+;;;7.6.
+(lambda (x)
+  (if (or (equal x t) (equal x nil))
+      t nil)
+    )
 
+;;;7.7
+(defun flips-each (list)
+  (mapcar #'(lambda (x) (if (equal x 'up) 'down 'up))
+          list))
+
+;;;7.8
