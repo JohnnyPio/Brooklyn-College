@@ -358,6 +358,21 @@
   (subst 'we 'i list)
   )
 
-
 ;;;;; CHAPTER 7
+;;;7.1
+(defun add1 (n)
+  (+ n 1)
+  )
 
+; (mapcar #'add1 '(1 3 5 7 9)) => (2 4 6 8 10)
+
+;;;7.2
+(setf daily-planet '((olsen jimmy 123-76-4535 cub-reporter)
+                      (kent clark 089-52-6787 reporter)
+                      (lane lois 951-26-1438 reporter)
+                      (white perry 355-16-7439 editor))
+  )
+
+;(mapcar #'third daily-planet) => (|123-76-4535| |089-52-6787| |951-26-1438| |355-16-7439|)         
+
+;;;7.3
