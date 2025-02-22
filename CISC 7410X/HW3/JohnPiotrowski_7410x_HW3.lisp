@@ -439,4 +439,25 @@
 (defun notes (list)
   (mapcar #'convert-number-to-note list))
 
-;;;7.10d
+;;;7.10d. Both return a list of NILs.
+;; CL-USER> (NOTES (NOTES '(5 3 1 3 5 5 5)))
+;; (NIL NIL NIL NIL NIL NIL NIL)
+;; CL-USER> (NUMBERS (NUMBERS '(E D C D E E E)))
+;; (NIL NIL NIL NIL NIL NIL NIL)
+
+;;;7.10e.
+(defun raise (n list)
+  (mapcar #'(lambda (x) (+ x n)) list)
+  )
+
+;;;7.10f.
+(defun normalize (list)
+  (mapcar #'(lambda (x) (cond ((> x 12) (- x 12))
+                              ((< x 1) (+ x 12))
+                              (t x)))
+              list))
+
+;;;7.10g.
+(defun transpose (n song)
+  ()
+  )
