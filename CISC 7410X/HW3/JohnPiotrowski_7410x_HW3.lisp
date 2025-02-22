@@ -414,4 +414,29 @@
 (defun find-nested (list)
   (find-if #'listp list))
 
-;;;7.10
+;;;7.10a.
+(setf table-of-notes '((c . 1) (f-sharp . 7)
+                               (c-sharp . 2) (g . 8)
+                                (d . 3) (g-sharp . 9)
+                                (d-sharp . 4) (a . 10)
+                                (e . 5) (a-sharp . 11)
+                                (f . 6) (b . 12)))
+
+;;;7.10b
+(defun convert-note-to-number (note)
+  (cdr (assoc note table-of-notes))
+  )
+
+
+(defun numbers (list)
+  (mapcar #'convert-note-to-number list))
+
+;;;7.10c
+(defun convert-number-to-note (num)
+  (car (rassoc num table-of-notes))
+  )
+
+(defun notes (list)
+  (mapcar #'convert-number-to-note list))
+
+;;;7.10d
