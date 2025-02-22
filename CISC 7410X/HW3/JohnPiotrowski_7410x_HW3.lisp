@@ -587,9 +587,24 @@
   (reduce #'higher-rank hand)
   )
 
-;;;7.16
+;;;7.16. We should use UNION instead of APPEND.
 
+;;;7.17.
+(defun len-list-of-lists (list)
+  (length(reduce #'append list))
+  )
 
+;;;7.18. The identity value for addition is 0 - any number +0 is that number. For multiplication the identity value is 1 - any number *1 is that number.
 
+;;;7.19
+(defun all-odd (list)
+  (every #'oddp list)
+  )
 
+;;;7.20
+(defun none-odd (list)
+  (every #'evenp list)
+  )
+
+;;;7.21
 
