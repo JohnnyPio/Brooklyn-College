@@ -458,6 +458,21 @@
               list))
 
 ;;;7.10g.
-(defun transpose (n song)
-  ()
+(defun transpose-song (half-steps song)
+  (notes
+   (normalize
+    (raise half-steps
+           (numbers song)
+           )
+    )
+   )
   )
+
+;; CL-USER> (TRANSPOSE-song 11 '(E D C D E E E))
+;; (D-SHARP C-SHARP B C-SHARP D-SHARP D-SHARP D-SHARP)
+;; CL-USER> (TRANSPOSE-song 12 '(E D C D E E E))
+;; (E D C D E E E)
+;; CL-USER> (TRANSPOSE-song -1 '(E D C D E E E))
+;; (D-SHARP C-SHARP B C-SHARP D-SHARP D-SHARP D-SHARP)
+
+;;;7.11
