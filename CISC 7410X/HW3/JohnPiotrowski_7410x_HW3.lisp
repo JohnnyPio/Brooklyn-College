@@ -512,3 +512,45 @@
    x))
 
 ;;;7.15
+;;7.15a
+(defun rank (card)
+  (first card)
+  )
+
+(defun suit (card)
+  (second card)
+  )
+
+;;7.15b
+(defvar my-hand '((3 hearts)
+                 (5 clubs)
+                 (2 diamonds)
+                 (4 diamonds)
+                  (ace spades)))
+
+(defun count-suit (suit hand)
+  (length
+   (remove-if-not #'(lambda (x)
+                (equal (second x) suit))
+                  hand))
+  )
+
+;;7.15c
+(defvar colors '((clubs black)
+                 (diamonds red)
+                 (hearts red)
+                 (spades black)))
+
+(defun color-of (card)
+  (second
+   (find-if #'(lambda (x)
+                (equal (suit card) (first x)))
+            colors))
+  )
+
+;;7.15d
+(defun first-red (hand)
+  (find-if #'(lambda (x)
+               (equal (color-of x) 'red))
+           hand)
+  )
