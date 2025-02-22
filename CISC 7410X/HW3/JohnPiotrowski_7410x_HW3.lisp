@@ -415,7 +415,8 @@
   (find-if #'listp list))
 
 ;;;7.10a.
-(setf table-of-notes '((c . 1) (f-sharp . 7)
+;;removed the setf below to avoid compiler warnings
+(defvar table-of-notes '((c . 1) (f-sharp . 7)
                                (c-sharp . 2) (g . 8)
                                 (d . 3) (g-sharp . 9)
                                 (d-sharp . 4) (a . 10)
@@ -476,3 +477,38 @@
 ;; (D-SHARP C-SHARP B C-SHARP D-SHARP D-SHARP D-SHARP)
 
 ;;;7.11
+(defun one-to-five (x)
+  (remove-if-not #'(lambda (x)
+                     (and (> x 1) (< x 5)))
+                 x)
+  )
+
+;;;7.12
+(defun count-the (list)
+  (length
+   (remove-if-not #'(lambda (x)
+                      (equal x 'the))
+                  list)))
+
+;;;7.13
+(defun pick-lists-of-twos (list)
+  (remove-if-not #'(lambda (x)
+                     (equal (length x) 2))
+                 list)
+  )
+
+;;;7.14
+(defun my-union (x y)
+     (append x
+             (remove-if
+              #'(lambda (e)
+                  (member e x))
+              y)))
+  
+(defun my-intersection (x y)
+  (remove-if-not
+   #'(lambda (e)
+       (member e y))
+   x))
+
+;;;7.15
