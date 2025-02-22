@@ -607,4 +607,67 @@
   )
 
 ;;;7.21
+(defun not-all-odd (list)
+  (find-if #'evenp list)
+  )
 
+;;;7.22
+(defun not-none-odd (list)
+  (find-if #'oddp list)
+  )
+
+;;;7.23. Yes, all 4 functions are distinct from one another. not-all-odd should be called find-even and not-none-odd should be called find-odd.
+
+;;;7.24. An applicative operator is a function that takes another function as an argument, and then applies that higher-order function to data.
+
+;;;7.25. Lambda expressions are useful when we don't want to define a function only within the context of another function - mostly for one-time use. We can do without them but need to define a function every time using DEFUN, even when only being used once within the context of a parent function. We would not be able to utilize the helpful feature that lambdas expressions can refer to local variables in the parent function.
+
+;;;7.26
+(defun my-find-if (pred my_list)
+  (first (remove-if-not pred my_list))
+  )
+
+;;;7.27
+(defun my-every (pred my_list)
+  (not (remove-if pred my_list)))
+
+;;;7.28
+
+;;   □ □ □ □
+;;   ?  ?  ?  ? -> ○
+
+;;;7.29
+(defvar database
+      '((b1 shape brick)
+        (b1 color green)
+        (b1 size small)
+        (b1 supported-by b2)
+        (b1 supported-by b3)
+        (b2 shape brick)
+        (b2 color red)
+        (b2 size small)
+        (b2 supports b1)
+        (b2 left-of b3)
+        (b3 shape brick)
+        (b3 color red)
+        (b3 size small)
+        (b3 supports b1)
+        (b3 right-of b2)
+        (b4 shape pyramid)
+        (b4 color blue)
+        (b4 size large)
+        (b4 supported-by b5)
+        (b5 shape cube)
+        (b5 color green)
+        (b5 size large)
+        (b5 supports b4)
+        (b6 shape brick)
+        (b6 color purple)
+        (b6 size large)))
+
+;;7.29a
+(defun match-element (s1 s2)
+  (if (or (equal s1 s2) (equal s2 '?)) t nil)
+  )
+
+;;7.29b
