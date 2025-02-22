@@ -10,7 +10,7 @@
 ;;;6.4. (LAST '((A B C))) returns ((A B C)) because there is only 1 top-level list element and the last of that list returns that element.
 
 ;;;6.5.
-;(setf line '(ROSES ARE RED))
+(setf line '(ROSES ARE RED))
 ;; CL-USER> (reverse line)
 ;; (RED ARE ROSES)
 ;; CL-USER> (first (last line))
@@ -182,8 +182,7 @@
 ;;;6.29. LENGTH returns the number of entries in a table.
 
 ;;;6.30
-;;I would usually use setf but it doesn't work within the context of this lisp file, only on the slime-repl sbcl
-(defvar books '((war-and-peace . leo-tolstoy) (angelas-ashes . frank-mccourt) (romeo-and-juliet . william-shakespeare) (catch-22 . joseph-heller) (the-scarlet-letter . nathaniel-hawthorne)))
+(setf books '((war-and-peace . leo-tolstoy) (angelas-ashes . frank-mccourt) (romeo-and-juliet . william-shakespeare) (catch-22 . joseph-heller) (the-scarlet-letter . nathaniel-hawthorne)))
 
 ;;;6.31
 (defun who-wrote (name)
@@ -415,8 +414,7 @@
   (find-if #'listp list))
 
 ;;;7.10a.
-;;removed the setf below to avoid compiler warnings
-(defvar table-of-notes '((c . 1) (f-sharp . 7)
+(setf table-of-notes '((c . 1) (f-sharp . 7)
                                (c-sharp . 2) (g . 8)
                                 (d . 3) (g-sharp . 9)
                                 (d-sharp . 4) (a . 10)
@@ -522,7 +520,7 @@
   )
 
 ;;7.15b
-(defvar my-hand '((3 hearts)
+(setf my-hand '((3 hearts)
                  (5 clubs)
                  (2 diamonds)
                  (4 diamonds)
@@ -671,3 +669,74 @@
   )
 
 ;;7.29b
+(defun match-triple (asrt pat)
+  (if (and (match-element (first asrt) (first pat))
+           (match-element (second asrt) (second pat))
+           (match-element (third asrt) (third pat)))
+      t nil)
+  )
+
+;;;7.29c
+(defun fetch (pat)
+  (remove-if-not #'(lambda (x)
+                     (match-triple x pat))
+                 database))
+
+;;;7.29d
+;; CL-USER> (FETCH '(B4 SHAPE ?))
+;; ((B4 SHAPE PYRAMID))
+;; CL-USER> (FETCH '(? SHAPE BRICK))
+;; ((B1 SHAPE BRICK) (B2 SHAPE BRICK) (B3 SHAPE BRICK) (B6 SHAPE BRICK))
+;; CL-USER> (FETCH '(B2 ? B3))
+;; ((B2 LEFT-OF B3))
+;; CL-USER> (FETCH '(? COLOR ?))
+;; ((B1 COLOR GREEN) (B2 COLOR RED) (B3 COLOR RED) (B4 COLOR BLUE)
+;;                   (B5 COLOR GREEN) (B6 COLOR PURPLE))
+;; CL-USER> (FETCH '(B4 ? ?))
+;; ((B4 SHAPE PYRAMID) (B4 COLOR BLUE) (B4 SIZE LARGE) (B4 SUPPORTED-BY B5))
+
+;;;7.29e
+(defun color-pattern-ask (block)
+  (list block 'color '?)
+  )
+
+;;;7.29f
+(defun supporters (block)
+  (mapcar #'first
+          (fetch (list '? 'supports block)))
+  )
+
+;;;7.29g
+(defun supp-cube (block)
+  (let ((supps (supporters block)))
+    (remove-if-not #'(lambda (x)
+                       (fetch (list x 'shape 'cube)))
+                   supps)
+  ))
+
+;;;7.29h
+(defun desc1 (block)
+  (fetch (list block '? '?))
+  )
+
+;;;7.29i
+(defun desc2 (block)
+  (mapcar #'(lambda (x)
+             (rest x))
+          (desc1 block)
+          )
+  )
+
+;;;7.29j
+(defun description (block)
+  (reduce #'append (desc2 block)))
+
+;;;7.29k
+;; CL-USER> (DESCRIPTION 'B1)
+;; (SHAPE BRICK COLOR GREEN SIZE SMALL SUPPORTED-BY B2 SUPPORTED-BY B3)
+;; CL-USER> (DESCRIPTION 'B4)
+;; (SHAPE PYRAMID COLOR BLUE SIZE LARGE SUPPORTED-BY B5)
+
+;;;7.29l. I would add these two lists to the database (B1 MATERIAL WOOD) (B2 MATERIAL PLASTIC).
+
+  
