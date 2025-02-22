@@ -554,3 +554,42 @@
                (equal (color-of x) 'red))
            hand)
   )
+
+;;;7.15e
+(defun black-cards (hand)
+  (remove-if-not #'(lambda (x)
+                     (equal (color-of x) 'black))
+                 hand)
+  )
+
+;;;7.15f
+(defun what-ranks (suit hand)
+  (mapcar #' rank
+   (remove-if-not #'(lambda (x)
+                        (equal (suit x) suit))
+                  hand)
+   )
+  )
+
+;;;7.15g
+(defvar all-ranks '(2 3 4 5 6 7 8 9 10 jack queen king ace))
+
+(defun higher-rank-p (c1 c2)
+  (if (member c1 (member c2 all-ranks)) t nil)
+  )
+
+;;;7.15h
+(defun higher-rank (c1 c2)
+  (if (higher-rank-p c1 c2) c1 c2)
+  )
+
+(defun high-card (hand)
+  (reduce #'higher-rank hand)
+  )
+
+;;;7.16
+
+
+
+
+
