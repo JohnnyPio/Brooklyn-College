@@ -12,6 +12,7 @@ def read_csv_as_list(filename):
         reader = csv.reader(file)
         return list(reader)
 
+#Assuming no handling in merge_join for many-to-many matches and worktables
 def merge_join(csv1, csv2):
     filedata1 = read_csv_as_list(csv1)
     filedata2 = read_csv_as_list(csv2)
@@ -28,7 +29,8 @@ def merge_join(csv1, csv2):
     filedata2.sort()
 
     # Initialize row iterators
-    file1_row_it, file2_row_it = 0, 0
+    file1_row_it = 0
+    file2_row_it = 0
 
     while file1_row_it < len(filedata1) and file2_row_it < len(filedata2):
         key1 = filedata1[file1_row_it][0]
@@ -36,16 +38,49 @@ def merge_join(csv1, csv2):
 
         if key1 == key2:
             result.append(filedata1[file1_row_it] + filedata2[file2_row_it])
-            file2_row_it += 1  # Move down a row in file2
+            file2_row_it += 1
         elif key1 < key2:
-            file1_row_it += 1  # Move down a row in file1
+            file1_row_it += 1
         else:
-            file2_row_it += 1  # Move down a row in file2
+            file2_row_it += 1
 
     return result
+
+def nested_loop_join(csv1, csv2):
+    filedata1 = read_csv_as_list(csv1)
+    filedata2 = read_csv_as_list(csv2)
+
+    # Assuming first row is headers, we want to remove them
+    headers1 = filedata1.pop(0)
+    headers2 = filedata2.pop(0)
+
+    # Initialize result and add header rows to result
+    result = [headers1 + headers2]
+
+    # Initialize file 1 row iterators
+    file1_row_it = 0
+
+    for row_f1 in filedata1:
+        key1 = filedata1[file1_row_it][0]
+
+        # Initialize file 2 row iterators
+        file2_row_it = 0
+
+        for row_f2 in filedata2:
+            key2 = filedata2[file2_row_it][0]
+
+            if key1 == key2:
+                result.append(filedata1[file1_row_it] + filedata2[file2_row_it])
+
+            file2_row_it += 1
+
+        file1_row_it += 1
+
+    return result
+
 
 file1 = 'C:/Users/JohnS/OneDrive/Documents/Local repos/Brooklyn-College/CISC 7510X/HW3/file1.csv'
 file2 = 'C:/Users/JohnS/OneDrive/Documents/Local repos/Brooklyn-College/CISC 7510X/HW3/file2.csv'
 
-merged = merge_join(file1, file2)
+merged = nested_loop_join(file1, file2)
 print(merged)
