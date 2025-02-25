@@ -79,9 +79,9 @@ def nested_loop_join(csv1, csv2):
     # Initialize result and add header rows to result
     result = [headers1 + headers2]
 
-    # Added this as a potential optimizer for large files: https://youtu.be/0arjvMJihJo?si=_poy6ODgEHiXa88y
-    filedata1.sort()
-    filedata2.sort()
+    # # Added this as a potential optimizer for large files: https://youtu.be/0arjvMJihJo?si=_poy6ODgEHiXa88y
+    # filedata1.sort()
+    # filedata2.sort()
 
     # Initialize file 1 row iterators
     file1_row_it = 0
