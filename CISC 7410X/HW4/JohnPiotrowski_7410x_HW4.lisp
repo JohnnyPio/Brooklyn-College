@@ -29,4 +29,45 @@
   (if (null x) nil
       (if (oddp (first x)) t (anyoddp (rest x)))))
 
-;;;8.3
+;;;8.3. (FACT 20.0) produces a different result than (FACT 20) because FACT 20.0 uses floating point calculations while FACT 20 uses bignum calculations which have much higher precision (limited only by total memory available). FACT 0 and FACT 0.0 produce the same result because they hit the first zerop condition which returns 1.
+
+(defun fact (n)
+  (cond ((zerop n) 1)
+        (t (* n (fact (- n 1))))))
+
+;; CL-USER> (FACT 20)
+;; 2432902008176640000
+;; CL-USER> (FACT 20.0)
+;; 2.432902e18
+;; CL-USER> (FACT 0.0)
+;; 1
+;; CL-USER> (FACT 0)
+;; 1
+
+;;;8.4
+(defun laugh (num)
+  (cond ((zerop num) ())
+        (t (cons 'ha (laugh (- num 1)))))
+  )
+
+;; CL-USER> (trace laugh)
+;; (LAUGH)
+;; CL-USER> (laugh 3)
+;; 0: (LAUGH 3)
+;; 1: (LAUGH 2)
+;; 2: (LAUGH 1)
+;; 3: (LAUGH 0)
+;; 3: LAUGH returned NIL
+;; 2: LAUGH returned (HA)
+;; 1: LAUGH returned (HA HA)
+;; 0: LAUGH returned (HA HA HA)
+;; (HA HA HA)
+
+;; CL-USER> (laugh 0)
+;; NIL  
+
+;; (laugh -1) produces an infinite loop because we don't have error handling for if num is a negative number.
+
+
+;;;8.5
+
