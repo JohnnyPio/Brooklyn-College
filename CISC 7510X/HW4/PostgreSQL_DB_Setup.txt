@@ -1,0 +1,47 @@
+C:\Users\JohnS>psql -U postgres
+postgres=# CREATE DATABASE stock_tracking WITH ENCODING 'UTF8';
+CREATE DATABASE
+postgres=# \c stock_tracking;
+You are now connected to database "stock_tracking" as user "postgres".
+stock_tracking=# CREATE TABLE cts(tdate DATE,symbol varchar(20),open decimal(18,8), high decimal(18,8), low decimal(18,8), close decimal(18,8), volume bigint);
+CREATE TABLE
+stock_tracking=# CREATE TABLE splits(tdate DATE, symbol varchar(20), post INT, pre INT);
+CREATE TABLE
+stock_tracking=# CREATE TABLE dividend(tdate DATE,symbol varchar(20),dividend decimal(18,8));
+CREATE TABLE
+
+-- Am using windows so went down an access rabbit hole to get these to copy :)
+stock_tracking=# COPY dividend FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\dividends.csv' DELIMITER ',';
+COPY 320742
+stock_tracking=# COPY splits FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\splits.dump.csv' DELIMITER ',';
+COPY 8471
+
+stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
+ERROR:  invalid input syntax for type numeric: ""
+CONTEXT:  COPY cts, line 43398679, column low: ""
+-- Had to go delete this line because there was an empty column and I didn't add handling for NULL (20130819,V,172.33,176.89,,174.98,2995500)
+stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
+COPY 44314946
+
+-- SIZES
+
+stock_tracking=# SELECT pg_size_pretty(pg_database_size('stock_tracking')) AS database_size;
+ database_size
+---------------
+ 6304 MB
+
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('cts')) AS total_table_size;
+ total_table_size
+------------------
+ 6282 MB
+
+
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('dividend')) AS total_table_size;
+ total_table_size
+------------------
+ 14 MB
+ 
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('splits')) AS total_table_size;
+ total_table_size
+------------------
+ 440 kB
