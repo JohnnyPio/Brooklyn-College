@@ -70,4 +70,18 @@
 
 
 ;;;8.5
+;;8.5a. We stop when there is an empty list. Having an empty list would return a sum value of 0.
 
+;;8.5b. The single step should be adding the first element of the list to the add-up of the rest of the list.
+
+;;8.5c. 
+(defun add-up (num_list)
+  (cond ((null num_list) 0)
+        (t (+ (first num_list) (add-up (rest num_list))))
+        )
+  )
+
+;;;8.6
+(defun alloddp (num_list)
+  ()
+  )
