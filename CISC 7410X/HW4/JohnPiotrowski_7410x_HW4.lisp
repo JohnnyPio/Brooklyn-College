@@ -97,3 +97,30 @@
   )
 
 ;;;8.8
+(defun rec-assoc (key table)
+  (cond ((null table) nil)
+        ((equal key (first (first table))) (first table))
+        (t (rec-assoc key (rest table)))
+  ))
+
+;;;8.9
+(defun rec-nth (n my_list)
+  (cond ((zerop n) (first my_list))
+        (t (rec-nth (- n 1) (rest my_list))))
+        )
+
+;;;8.10
+(defun add1 (num)
+  (+ num 1)
+  )
+
+(defun sub1 (num)
+  (- num 1)
+  )
+
+(defun rec-plus (x y)
+  (cond ((zerop y) x)
+        (t (rec-plus (add1 x) (sub1 y))))
+  )
+
+;;;8.11
