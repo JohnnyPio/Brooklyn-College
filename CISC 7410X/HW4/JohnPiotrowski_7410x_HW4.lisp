@@ -83,5 +83,17 @@
 
 ;;;8.6
 (defun alloddp (num_list)
-  ()
+  (cond ((null num_list) t)
+        ((evenp (first num_list)) nil)
+        (t (alloddp (rest num_list)))
+        )
   )
+
+;;;8.7
+(defun rec-member (element my_list)
+  (cond ((null my_list) nil)
+        ((equal (first my_list) element) my_list)
+        (t (rec-member element (rest my_list))))
+  )
+
+;;;8.8
