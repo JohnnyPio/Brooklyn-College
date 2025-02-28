@@ -185,4 +185,55 @@
         (t (+ n (add-nums (- n 1)))))
   )
 
-;;;8.22.
+;;;8.22. This does not require augmentation. This is solved via double-test tail recursion. 
+(defun all-equal (my_list)
+  (cond ((< (length my_list) 2) t)
+        ((not (equal (first my_list) (second my_list))) nil)
+        (t (all-equal (rest my_list)))
+        )
+  )
+
+;;;8.23.
+  ;;CL-USER> (laugh 5)
+  ;; 0: (LAUGH 5) - first input = 5, second input  = (LAUGH 4)
+  ;;   1: (LAUGH 4) - first input = 4, second input  = (LAUGH 3)
+  ;;     2: (LAUGH 3) - first input = 3, second input  = (LAUGH 2)
+  ;;       3: (LAUGH 2) - first input = 2, second input  = (LAUGH 1)
+  ;;         4: (LAUGH 1) - first input = 1, second input  = (LAUGH 0)
+  ;;           5: (LAUGH 0)
+  ;;           5: LAUGH returned NIL
+  ;;         4: LAUGH returned (HA)
+  ;;       3: LAUGH returned (HA HA)
+  ;;     2: LAUGH returned (HA HA HA)
+  ;;   1: LAUGH returned (HA HA HA HA)
+  ;; 0: LAUGH returned (HA HA HA HA HA)
+  ;;(HA HA HA HA HA)
+
+;;;8.24
+(defun count-down (n)
+  (cond ((zerop n) nil)
+        (t (cons n (count-down (- n 1))))
+        )
+  )
+
+;;;8.25
+(defun fact-red (n)
+  (reduce #'* (count-down n))
+  )
+
+;;;8.26
+(defun count-down-var1 (n)
+  (cond ((equal n -1) nil)
+        (t (cons n (count-down (- n 1))))
+        )
+  )
+
+(defun count-down-var2 (n)
+  (cond ((minusp n) nil)
+        (t (cons n (count-down (- n 1))))
+        )
+  )
+
+;;;8.27
+
+   
