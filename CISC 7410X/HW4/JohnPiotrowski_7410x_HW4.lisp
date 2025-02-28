@@ -124,3 +124,23 @@
   )
 
 ;;;8.11
+(defun fib (x)
+  (cond ((equal x 0) 1)
+        ((equal x 1) 1)
+        (t (+ (fib (- x 1))
+              (fib (- x 2))))
+        )
+  )
+
+;;;8.12.
+;; CL-USER> (any-7-p '(1 2 3 4 7))
+;; T
+;; CL-USER> (any-7-p '(1 2 3 4)) - any list without 7 will recurse indefinitely.
+
+(defun any-7-p (x)
+  (cond ((equal (first x) 7) t)
+        (t (any-7-p (rest x)))))
+
+;;;8.13. Any input that is a negative number will cause FACT to recurse indefinitely as it doesn't have any handling for negative numbers.
+
+;;;8.14.
