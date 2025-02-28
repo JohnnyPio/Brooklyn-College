@@ -164,4 +164,25 @@
         (t (find-first-odd (rest x)))))
 
 ;;;8.18.
+(defun last-element (my_list)
+  (cond ((atom (cdr my_list)) (car my_list))
+        (t (last-element (rest my_list))))
+  )
 
+;;;8.19. Without the COND clause with the NULL text, ANYODDP will still work correctly when there is a list containing one or more odd numbers. However, it won't work if the list doesn't contain any odd numbers it will return an error.
+
+;;;8.20. FACT uses single test tail augmenting recursion.
+;; Func: fact
+;; End-test: (zerop n)
+;; End-value: 1
+;; Aug-fun: *
+;; Aug-val: n
+;; Reduced-x: (- n 1)
+
+;;8.21.
+(defun add-nums (n)
+  (cond ((zerop n) 0)
+        (t (+ n (add-nums (- n 1)))))
+  )
+
+;;;8.22.
