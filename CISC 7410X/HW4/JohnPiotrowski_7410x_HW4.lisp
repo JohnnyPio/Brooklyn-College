@@ -144,3 +144,24 @@
 ;;;8.13. Any input that is a negative number will cause FACT to recurse indefinitely as it doesn't have any handling for negative numbers.
 
 ;;;8.14.
+(defun inf-rec-add (x)
+  (+ 1 (inf-rec-add x))
+  )
+
+;;;8.15. The CAR is x. The CDR points to the list itself. COUNT-SLICES will recurse indefinitely as the list keeps pointing to itself with no stop condition.
+
+;;;8.16. This below works very similarly to anyoddp except when there is an empty list. This function returns a TYPE error when that happens instead of a NIL.
+(defun anyoddp-alt (x)
+  (cond ((oddp (first x)) t)
+        ((null x) nil)
+        (t (anyoddp (rest x)))
+        ))
+
+;;;8.17
+(defun find-first-odd (x)
+  (cond ((null x) nil)
+        ((oddp (first x)) (first x))
+        (t (find-first-odd (rest x)))))
+
+;;;8.18.
+
