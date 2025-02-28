@@ -235,5 +235,33 @@
   )
 
 ;;;8.27
+(defun square-list (my_list)
+  (cond ((null my_list) nil)
+        (t (cons (* (first my_list) (first my_list)) (square-list (rest my_list))))
+        )
+  )
 
-   
+;;;8.28
+(defun my-nth (n x)
+  (cond ((null x) nil)
+        (t (my-nth (- n 1) (rest x)))))
+
+;;;8.29
+(defun my-member (e my_list)
+  (cond ((null my_list) nil)
+        ((equal e (first my_list)) my_list)
+        (t (my-member e (rest my_list)))
+        )
+  )
+
+;;;8.30
+(defun my-assoc (key table)
+  (cond ((null table) nil)
+        ((equal key (first (first table))) (first table))
+        (t (my-assoc key (rest table))))
+  )
+
+;;;8.31
+(defun compare-lengths (l1 l2)
+  (cond (()))
+  )
