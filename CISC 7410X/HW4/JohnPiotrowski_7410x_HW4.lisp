@@ -421,5 +421,47 @@
   )
 
 ;;;8.49
+(defun pairings (l1 l2)
+  (cond ((null l1) nil)
+        (t (cons (list (first l1) (first l2)) (pairings (rest l1) (rest l2))))
+        )
+  )
 
+;;;8.50
+(defun sublists (my_list)
+  (cond ((null my_list) nil)
+        (t (cons my_list (sublists (rest my_list))))
+        )
+  )
 
+;;;8.51
+(defun my-reverse (my_list)
+  (my-reverse-recursive my_list nil)
+  )
+
+(defun my-reverse-recursive (my_list e)
+  (cond ((null my_list) e)
+        (t (my-reverse-recursive (rest my_list) (cons (first my_list) e)))
+        )
+  )
+
+;;;8.52
+(defun my-union (s1 s2)
+  (append s1 (my-union-rec s1 s2))
+  )
+
+(defun my-union-rec (s1 s2)
+  (cond ((null s2) nil)
+        ((member (first s2) s1) (my-union-rec s1 (rest s2)))
+        (t (cons (first s2) (my-union-rec s1 (rest s2))))
+        )
+  )
+
+;;;8.53
+(defun largest-even (my_list)
+  (cond ((null my_list) 0)
+        ((oddp (first my_list)) (largest-even (rest my_list)))
+        (t (max (first my_list) (largest-even (rest my_list)))))
+  )
+
+;;;8.54
