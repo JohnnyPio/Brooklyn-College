@@ -304,13 +304,13 @@
 ;;;8.36
 (defun count-odd-cond-aug (my_list)
   (cond ((null my_list) 0)
-        ((oddp (first my_list)) (+ 1 (count-odd (rest my_list))))
-        (t (count-odd (rest my_list)))))
+        ((oddp (first my_list)) (+ 1 (count-odd-cond-aug (rest my_list))))
+        (t (count-odd-cond-aug (rest my_list)))))
 
 (defun count-odd-reg-aug (my_list)
   (cond ((null my_list) nil)
         (t (+ (if (oddp (first my_list)) 1 0)
-              (count-odd (rest my_list))))))
+              (count-odd-reg-aug (rest my_list))))))
 
 ;;;8.37
 (defun combine (n1 n2)
@@ -346,4 +346,23 @@
 
 ;; Every nonterminal call to FIB makes a single call to COMBINE. Every call to COMBINE combines the results of two FIB calls.
 
-;;;6.38
+;;;8.38. It appends an extra ". q" to the end of every list because the NILs convert to Qs.
+(defun atoms-to-q (x)
+  (cond ((null x) nil)
+    ((atom x) 'q)
+        (t (cons (atoms-to-q (car x))
+                 (atoms-to-q (cdr x))))))
+
+;;;8.39
+(defun count-atoms (tree)
+  (cond ((atom tree) 1)
+        (t (+ (count-atoms (car tree)) (count-atoms (cdr tree)))))
+  )
+
+;;;8.40
+(defun count-cons (tree)
+  (cond ((atom tree) 0)
+        (t (+ 1 (count-cons (car tree)) (count-cons (cdr tree)))))
+  )
+
+;;;8.41
