@@ -409,3 +409,17 @@
   )
 
 ;;;8.47
+(defun make-loaf (n)
+  (if (zerop n) nil
+      (append (make-loaf (- n 1)) (list 'X)))
+  )
+
+;;;8.48. Single-test augmenting.
+(defun bury (item n)
+  (cond ((zerop n) nil)
+        (t (list (bury item (- n 1)))))
+  )
+
+;;;8.49
+
+
