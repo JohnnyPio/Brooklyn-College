@@ -366,3 +366,46 @@
   )
 
 ;;;8.41
+(defun sum-tree (tree)
+  (cond ((numberp tree) tree)
+        ((atom tree) 0)
+        (t (+ (sum-tree (first tree)) (sum-tree (rest tree)))))
+  )
+
+;;;8.42
+(defun my-subst (x y tree)
+  (cond ((equal tree x) y)
+        ((atom tree) tree)
+        (t (cons (my-subst x y (first tree)) (my-subst x y (rest tree)))))
+  )
+
+;;;8.43
+(defun flatten (n_list)
+  (cond ((null n_list) nil)
+        ((atom n_list) (list n_list))
+        (t (append (flatten (first n_list)) (flatten (rest n_list)))))
+  )
+
+;;;8.44
+(defun tree-depth (tree)
+  (cond ((atom tree) 0)
+        (t (+ 1 (max (tree-depth (car tree))
+                     (tree-depth (cdr tree)))))
+        )
+  )
+
+;;;8.45
+(defun paren-depth (tree)
+  (cond ((atom tree) 0)
+        (t (max (+ 1 (paren-depth (car tree)))
+                (paren-depth (cdr tree))))
+        )
+  )
+
+;;;8.46
+(defun count-up (n)
+  (cond ((zerop n) nil)
+        (t (append (count-up (- n 1)) (list n))))
+  )
+
+;;;8.47
