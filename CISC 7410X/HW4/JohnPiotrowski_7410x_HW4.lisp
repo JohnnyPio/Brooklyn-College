@@ -263,5 +263,87 @@
 
 ;;;8.31
 (defun compare-lengths (l1 l2)
-  (cond (()))
+  (cond ((and (null l1) (null l2) 'same-length))
+        ((null l2) 'first-is-longer)
+        ((null l1) 'second-is-longer)
+        (t (compare-lengths (rest l1) (rest l2))))
   )
+
+;;;8.32
+(defun sum-numeric-elements (my_list)
+  (cond ((null my_list) 0)
+        ((numberp (first my_list)) (+ (first my_list) (sum-numeric-elements (rest my_list))))
+        (t (sum-numeric-elements (rest my_list))))
+  )
+
+;;;8.33
+(defun my-remove (e my_list)
+  (cond ((null my_list) nil)
+        ((equal e (first my_list)) (my-remove e (rest my_list)))
+        (t (cons (first my_list) (my-remove e (rest my_list))))
+        ))
+
+;;;8.34
+(defun my-intersection (s1 s2)
+  (cond ((null s1) nil)
+        ((member (first s1) s2)
+         (cons (first s1) (my-intersection (rest s1) s2)))
+        (t (my-intersection (rest s1) s2))
+        )
+  )
+
+;;;8.35
+(defun my-set-difference (s1 s2)
+  (cond ((null s1) nil)
+        ((not (member (first s1) s2))
+         (cons (first s1) (my-set-difference (rest s1) s2)))
+        (t (my-set-difference (rest s1) s2))
+        )
+  )
+
+;;;8.36
+(defun count-odd-cond-aug (my_list)
+  (cond ((null my_list) 0)
+        ((oddp (first my_list)) (+ 1 (count-odd (rest my_list))))
+        (t (count-odd (rest my_list)))))
+
+(defun count-odd-reg-aug (my_list)
+  (cond ((null my_list) nil)
+        (t (+ (if (oddp (first my_list)) 1 0)
+              (count-odd (rest my_list))))))
+
+;;;8.37
+(defun combine (n1 n2)
+  (+ n1 n2)
+  )
+
+(defun fib-with-combine (x)
+  (cond ((equal x 0) 1)
+        ((equal x 1) 1)
+        (t (combine (fib (- x 1)) (fib (- x 2))))
+        ))
+
+;; CL-USER> (fib 4)
+;; 0: (FIB 4)
+;; 1: (FIB 3)
+;; 2: (FIB 2)
+;; 3: (FIB 1)
+;; 3: FIB returned 1
+;; 3: (FIB 0)
+;; 3: FIB returned 1
+;; 2: FIB returned 2
+;; 2: (FIB 1)
+;; 2: FIB returned 1
+;; 1: FIB returned 3
+;; 1: (FIB 2)
+;; 2: (FIB 1)
+;; 2: FIB returned 1
+;; 2: (FIB 0)
+;; 2: FIB returned 1
+;; 1: FIB returned 2
+;; 0: FIB returned 5
+;; 5
+
+;; Every nonterminal call to FIB makes a single call to COMBINE. Every call to COMBINE combines the results of two FIB calls.
+
+;;;6.38
