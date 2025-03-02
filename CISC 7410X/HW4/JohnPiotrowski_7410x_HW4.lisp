@@ -557,4 +557,32 @@
         (yvette robert zelda)
         (diane peter erica)))
 
-8.60a.
+;;; 8.60a.                                  
+(defun father (name)
+  (second (assoc name family))
+  )
+
+(defun mother (name)
+  (third (assoc name family))
+  )
+
+(defun parents (name)
+  (remove nil (rest (assoc name family)))
+  )
+
+(defun children (name)
+  (mapcar #'first (remove-if-not #'(lambda (x) (member name (rest x)))
+                  family))
+  )
+
+;;;8.60b.
+(defun siblings (name)
+  (remove name (union (children (father name)) (children (mother name)))))
+
+;;;8.60c.
+(defun mapunion (fn my_list)
+  (reduce #'union (mapcar fn my_list)
+   )
+  )
+
+;;;8.60d
