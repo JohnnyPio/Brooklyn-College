@@ -609,4 +609,36 @@
         (t (union (parents person) (union (ancestors (mother person)) (ancestors (father person))))))
   )
 
-;;;8.60h
+;;;8.60
+(defun generation-gap (person ancestor)
+  (generation-gap-helper person ancestor 0))
+ 
+(defun generation-gap-helper (person ancestor cnt)
+  (cond ((null person) nil)
+        ((equal person ancestor) cnt)
+        (t (or (generation-gap-helper (father person) ancestor (+ cnt 1))
+               (generation-gap-helper (mother person) ancestor (+ cnt 1))))
+        )
+  )
+
+;;;8.61i.
+;;;8.61i.1) No.
+;; CL-USER> (GENERATION-GAP 'robert 'deirdre)
+;; NIL
+
+;;;8.61i.2)
+;; CL-USER> (ancestors 'yvette)
+;; (JULIE QUENTIN ELLEN GEORGE ARTHUR KATE LINDA FRANK DEIRDRE COLIN BRUCE SUZANNE
+;;        VINCENT WANDA ROBERT ZELDA)
+
+;;;8.61i.3)
+;; CL-USER> (GENERATION-GAP 'olivia 'frank)
+;; 3
+
+;;;8.61i.4)
+;; CL-USER> (cousins 'peter)
+;; (ROBERT JOSHUA)
+
+;;;8.61i.5)
+;; CL-USER> (grandparents 'olivia)
+;; (HILLARY ANDRE GEORGE ELLEN)
