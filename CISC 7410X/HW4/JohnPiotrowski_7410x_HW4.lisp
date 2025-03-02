@@ -586,3 +586,27 @@
   )
 
 ;;;8.60d
+(defun grandparents (name)
+  (mapunion #'parents (parents name))
+  )
+
+;;;8.60e
+(defun cousins (name)
+  (mapunion #'children (mapunion #'siblings (parents name)))
+  )
+
+;;;8.60f
+(defun descended-from (person ancestor)
+  (cond ((null person) nil)
+        ((member ancestor (parents person)) t)
+        (t (or (descended-from (mother person) ancestor)
+               (descended-from (father person) ancestor))))
+  )
+
+;;;8.60g
+(defun ancestors (person)
+  (cond ((null person) nil)
+        (t (union (parents person) (union (ancestors (mother person)) (ancestors (father person))))))
+  )
+
+;;;8.60h
