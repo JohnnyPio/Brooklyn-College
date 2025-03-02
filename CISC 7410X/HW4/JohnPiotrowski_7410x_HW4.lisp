@@ -465,3 +465,96 @@
   )
 
 ;;;8.54
+(defun huge (n)
+  (huge-rec n 0)
+  )
+
+(defun huge-rec (n cnt)
+  (cond ((equal cnt n) 1)
+        (t (* n (huge-rec n (+ cnt 1)))))
+  )
+
+;;;8.55. A recursive function calls itself as an argument.
+
+;;;8.56.
+(defun every-other (my_list)
+  (every-other-rec my_list 0)
+  )
+
+(defun every-other-rec (my_list cnt)
+  (cond ((null my_list) nil)
+        ((oddp cnt) (every-other-rec (rest my_list) (+ cnt 1)))
+        (t (cons (first my_list) (every-other-rec (rest my_list) (+ cnt 1))))
+        )
+  )
+
+;;;8.57
+(defun left-half (my_list)
+  (left-half-help my_list 0))
+
+
+(defun left-half-help (my_list cnt)
+  (cond ((null my_list) nil)
+        ((< (ceiling (/ (length my_list) 2)) cnt) (left-half-help (rest my_list) (+ cnt 1)))
+        (t (cons (first my_list) (left-half-help (rest my_list) (+ cnt 1)))))
+  )
+
+;;;8.58
+(defun merge-lists (l1 l2)
+  (cond ((null l2) l1)
+        ((null l1) l2)
+        ((> (first l2) (first l1)) (cons (first l1) (merge-lists (rest l1) l2)))
+        (t (cons (first l2) (merge-lists l1 (rest l2))))
+        )
+  )
+
+;;;8.59. Both equations are true. This definition is recursive but would cause an infinite loop for any inputs greater than zero because each call would be + 1 to the input indefinitely. It violates the first rule of recursion because there is no stopping point.
+
+;; CL-USER> (fact 0)
+;; 1
+;; CL-USER> (/ (fact 6) 6)
+;; 120
+;; CL-USER> (fact 5)
+;; 120
+
+(defun fact-bad (n)
+  (cond ((zerop n) 1)
+        (t (/ (fact (+ n 1)) (+ n 1)))
+        )
+  )
+
+;;;8.60.
+(defvar family
+      '((colin nil nil)
+        (deirdre nil nil)
+        (arthur nil nil)
+        (kate nil nil)
+        (frank nil nil)
+        (linda nil nil)
+        (suzanne colin deirdre)
+        (bruce arthur kate)
+        (charles arthur kate)
+        (david arthur kate)
+        (ellen arthur kate)
+        (george frank linda)
+        (hillary frank linda)
+        (andre nil nil)
+        (tamara bruce suzanne)
+        (vincent bruce suzanne)
+        (wanda nil nil)
+        (ivan george ellen)
+        (julie george ellen)
+        (marie george ellen)
+        (nigel andre hillary)
+        (frederick nil tamara)
+        (zelda vincent wanda)
+        (joshua ivan wanda)
+        (quentin nil nil)
+        (robert quentin julie)
+        (olivia nigel marie)
+        (peter nigel marie)
+        (erica nil nil)
+        (yvette robert zelda)
+        (diane peter erica)))
+
+8.60a.
