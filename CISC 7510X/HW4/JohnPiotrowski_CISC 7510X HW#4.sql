@@ -1,50 +1,30 @@
 -- John Piotrowski - HW4 - 7510x
 -- SET search_path = public, "$user", public;
 
-with msft_cts as (
-	select 
-	tdate as cnt_tdate,
-	symbol as cnt_symbol,
-	*
+with cts as (
+	select
+		tdate as cts_tdate,
+		symbol as cts_symbol,
+		close as cts_close
 	from cts
-	where cts.symbol = 'MSFT'
 ),
-msft_dividend as (
-	select *
-	from dividend
-	where dividend.symbol = 'MSFT'
-),
-msft_splits as (
-	select *
-	from splits
-	where splits.symbol = 'MSFT'
-),
-all_3_combined as (
-select *,
-lag(close) over (partition by cnt_symbol order by cnt_tdate) as day_before_close_price
-from msft_cts
-left join msft_dividend on msft_cts.tdate = msft_dividend.tdate
-left join msft_splits on msft_cts.tdate = msft_splits.tdate
-where msft_cts.tdate = '1987-01-05'
-	or msft_cts.tdate = '2003-02-14'
-	or msft_cts.tdate = '2004-11-12'
-	or msft_cts.tdate = '2004-11-15'
-	or msft_cts.tdate = '1987-09-18'
-	or msft_cts.tdate = '1987-09-17'
-	or msft_splits.tdate IS NOT NULL
-	or msft_dividend.tdate IS NOT NULL
-order by msft_cts.tdate asc
-),
-daily_prct_basic as (
+all_3_tables_combined as (
 	select 
 		*,
-		case
-			WHEN dividend is null and post is null THEN 100*(close-open)/open
-			WHEN dividend is not null THEN 100*(close/(day_before_close_price-dividend)-1)
-			WHEN post is not null THEN 100*((close/(day_before_close_price*(pre/(post*1.0))))-1)
-			else NULL
-		end as daily_prct
-	from all_3_combined
+		lag(cts_close) over (partition by cts_symbol order by cts_tdate) as prev_close
+	from cts
+	left join dividend on cts_tdate = dividend.tdate and cts_symbol = dividend.symbol
+	left join splits on cts_tdate = splits.tdate and cts_symbol = splits.symbol
 )
-select *
-from daily_prct_basic
+select 
+	cts_tdate as tdate,
+	cts_symbol as symbol,
+	case
+		WHEN dividend is null and post is null THEN 100*((cts_close-prev_close)/prev_close)
+		WHEN dividend is not null THEN 100*(cts_close/(prev_close-dividend)-1)
+		WHEN post is not null THEN 100*((cts_close/(prev_close*((pre*1.0)/(post*1.0))))-1)
+		else NULL
+	end as prcnt
+from all_3_tables_combined
+where cts_tdate > '1990-01-01'
+order by cts_tdate, cts_symbol
