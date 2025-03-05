@@ -621,25 +621,25 @@
         )
   )
 
-;;;8.61i.
-;;;8.61i.1) No.
+;;;8.60i.
+;;;8.60i.1) No.
 ;; CL-USER> (GENERATION-GAP 'robert 'deirdre)
 ;; NIL
 
-;;;8.61i.2)
+;;;8.60i.2)
 ;; CL-USER> (ancestors 'yvette)
 ;; (JULIE QUENTIN ELLEN GEORGE ARTHUR KATE LINDA FRANK DEIRDRE COLIN BRUCE SUZANNE
 ;;        VINCENT WANDA ROBERT ZELDA)
 
-;;;8.61i.3)
+;;;8.60i.3)
 ;; CL-USER> (GENERATION-GAP 'olivia 'frank)
 ;; 3
 
-;;;8.61i.4)
+;;;8.60i.4)
 ;; CL-USER> (cousins 'peter)
 ;; (ROBERT JOSHUA)
 
-;;;8.61i.5)
+;;;8.60i.5)
 ;; CL-USER> (grandparents 'olivia)
 ;; (HILLARY ANDRE GEORGE ELLEN)
 
