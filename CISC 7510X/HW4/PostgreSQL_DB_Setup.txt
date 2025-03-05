@@ -10,7 +10,7 @@ CREATE TABLE
 stock_tracking=# CREATE TABLE dividend(tdate DATE,symbol varchar(20),dividend decimal(18,8));
 CREATE TABLE
 
--- Am using windows so went down an access rabbit hole to get these to copy :)
+-- Used windows command line (before you showed Ubuntu in class) so went down an access rabbit hole to get these to copy :/
 stock_tracking=# COPY dividend FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\dividends.csv' DELIMITER ',';
 COPY 320742
 stock_tracking=# COPY splits FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\splits.dump.csv' DELIMITER ',';
@@ -19,29 +19,37 @@ COPY 8471
 stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
 ERROR:  invalid input syntax for type numeric: ""
 CONTEXT:  COPY cts, line 43398679, column low: ""
--- Had to go delete this line because there was an empty column and I didn't add handling for NULL (20130819,V,172.33,176.89,,174.98,2995500)
+-- Had to go delete line 43398679 because there was an empty column and I didn't add handling for NULL (20130819,V,172.33,176.89,,174.98,2995500)
 stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
 COPY 44314946
 
+-- After coming to your lecture, deleted the data out of the original "incomplete" table
+stock_tracking=# DELETE FROM cts;
+DELETE 44314946
+-- Then added the handling for NULL lines and that really helped :)
+stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata.20140211\cts.dump.csv' WITH DELIMITER ',' NULL '';
+COPY 44314948
+
+
 -- SIZES
 
-stock_tracking=# SELECT pg_size_pretty(pg_database_size('stock_tracking')) AS database_size;
- database_size
----------------
- 6304 MB
+stock_tracking=# SELECT pg_size_pretty(pg_database_size('stock_tracking'));
+ 3212 MB
 
-stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('cts')) AS total_table_size;
- total_table_size
-------------------
- 6282 MB
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('cts'));
+ 3190 MB
 
-
-stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('dividend')) AS total_table_size;
- total_table_size
-------------------
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('dividend'));
  14 MB
  
-stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('splits')) AS total_table_size;
- total_table_size
-------------------
+stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('splits'));
  440 kB
+
+ ------ HW 4
+
+ CREATE TABLE public.daily_prcnt
+(
+    tdate date,
+    symbol varchar(20),
+    prcnt decimal(18,8)
+);
