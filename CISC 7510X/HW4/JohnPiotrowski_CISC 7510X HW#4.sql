@@ -15,16 +15,16 @@ all_3_tables_combined as (
 	from cts
 	left join dividend on cts_tdate = dividend.tdate and cts_symbol = dividend.symbol
 	left join splits on cts_tdate = splits.tdate and cts_symbol = splits.symbol
-)
+), 
 select 
 	cts_tdate as tdate,
 	cts_symbol as symbol,
 	case
-		WHEN dividend is null and post is null THEN 100*((cts_close-prev_close)/prev_close)
-		WHEN dividend is not null THEN 100*(cts_close/(prev_close-dividend)-1)
-		WHEN post is not null THEN 100*((cts_close/(prev_close*((pre*1.0)/(post*1.0))))-1)
+		-- For the full dataset, I kept getting "divide by zero" errors for each THEN statement so I added NULLIFs which slowed down the query but lets it finish. One could likely speed it up by filtering out 'prev_close' = 0 and removing the NULLIFs.
+		WHEN dividend is null and post is null THEN 100*((cts_close-prev_close)/NULLIF(prev_close,0))
+		WHEN dividend is not null and post is null THEN 100*((cts_close/NULLIF(prev_close-dividend,0))-1)
+		WHEN post is not null and dividend is null THEN 100*(cts_close/(NULLIF((prev_close*((pre*1.0)/(post*1.0))),0))-1)
 		else NULL
 	end as prcnt
 from all_3_tables_combined
-where cts_tdate > '1990-01-01'
 order by cts_tdate, cts_symbol
