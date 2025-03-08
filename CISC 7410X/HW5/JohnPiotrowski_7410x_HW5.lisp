@@ -1,7 +1,31 @@
 ;John Piotrowski - 7410x - HW5
 ;GPS
 
-; I want to get home from class. There are three ways I can get home: walk to the b6 and take that to the F train - cost $6, walk to flatbush avenue and take the b103 - cost $3, or bike-free. Either 3 of the routes I can quick-walk-home. The 3 starting states can be (busses-running trains-running have-money), (busses-running have-money), (brought-bike have-no-money).
+; I want to get home from class. There are three ways I can get home: take the b6 and to the F train - cost $, take the b103 - cost $, or bike - doesn't cost money.
+
+;; CL-USER> (GPS '(in-class class-over trains-running busses-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-B6) 
+;; (EXECUTING TAKE-B6) 
+;; (EXECUTING ARRIVE-AT-BAY-PARKWAY-STATION) 
+;; (EXECUTING TAKE-F-TRAIN) 
+;; (EXECUTING ARRIVE-AT-CHURCH-AVE) 
+;; (EXECUTING WALK-HOME-FROM-SUBWAY-STATION) 
+;; SOLVED
+
+;; CL-USER> (GPS '(in-class class-over busses-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-B103) 
+;; (EXECUTING TAKE-B103) 
+;; (EXECUTING ARRIVE-AT-MCDONALD-AVE-BUS-STOP) 
+;; (EXECUTING WALK-HOME-FROM-BUS-STOP) 
+;; SOLVED
+
+;; CL-USER> (GPS '(in-class class-over brought-bike have-key) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-BIKE) 
+;; (EXECUTING UNLOCK-BIKE) 
+;; (EXECUTING ARRIVE-AT-BUILDING) 
+;; (EXECUTING LOCK-BIKE) 
+;; (EXECUTING TAKE-ELEVATOR) 
+;; SOLVED
 
 (defvar *state* nil "The current state: a list of conditions.")
 
@@ -43,29 +67,68 @@
 
 (defparameter *route-ops*
   (list
+   ;;B6 and F train
   (make-op :action 'walk-to-b6
            :preconds '(class-over)
            :add-list '(wait-for-b6)
            :del-list '(in-class))
   (make-op :action 'take-b6
-           :preconds '(busses-running have-money)  
+           :preconds '(busses-running have-money wait-for-b6)  
            :add-list '(on-b6)
            :del-list '(wait-for-b6))
+  (make-op :action 'arrive-at-bay-parkway-station
+           :preconds '(on-b6)  
+           :add-list '(at-bay-parkway-station)
+           :del-list '(on-b6))
   (make-op :action 'take-f-train
-           :preconds '(trains-running have-money)
+           :preconds '(trains-running have-money at-bay-parkway-station)
            :add-list '(on-f-train)
            :del-list '(on-b6))
-  (make-op :action 'walk-home-from-church-ave
-           :preconds '(busses-running trains-running have-money)
-           :add-list '(quick-walk-home)
+  (make-op :action 'arrive-at-church-ave
+           :preconds '(on-f-train)
+           :add-list '(at-church-ave-station)
            :del-list '(on-f-train))
-  (make-op :action 'walk-home
+  (make-op :action 'walk-home-from-subway-station
+           :preconds '(at-church-ave-station)
            :add-list '(at-home)
-           :del-list '(quick-walk-home))
+           :del-list '(at-church-ave-station))
+  ;;B103
+  (make-op :action 'walk-to-b103
+           :preconds '(class-over)
+           :add-list '(wait-for-b103)
+           :del-list '(in-class))
+  (make-op :action 'take-b103
+           :preconds '(busses-running have-money wait-for-b103)  
+           :add-list '(on-b103)
+           :del-list '(wait-for-b103))
+  (make-op :action 'arrive-at-mcdonald-ave-bus-stop
+           :preconds '(on-b103)
+           :add-list '(at-mcdonald-ave-bus-stop)
+           :del-list '(on-b103))
+  (make-op :action 'walk-home-from-bus-stop
+           :preconds '(at-mcdonald-ave-bus-stop)
+           :add-list '(at-home)
+           :del-list '(at-mcdonald-ave-bus-stop))
+  ;;Bike
+  (make-op :action 'walk-to-bike
+           :preconds '(class-over brought-bike)
+           :add-list '(at-bike)
+           :del-list '(in-class))
+  (make-op :action 'unlock-bike
+           :preconds '(at-bike have-key)
+           :add-list '(biking)
+           :del-list '(at-bike))
+  (make-op :action 'arrive-at-building
+           :preconds '(biking)
+           :add-list '(at-building-bike-storage)
+           :del-list '(biking))
+  (make-op :action 'lock-bike
+           :preconds '(have-key at-building-bike-storage)
+           :add-list '(locked-bike)
+           :del-list '(at-building-bike-storage))
+  (make-op :action 'take-elevator
+           :preconds '(locked-bike)
+           :add-list '(at-home)
+           :del-list '(locked-bike))
   ))
-
-
-
-
-
  
