@@ -27,6 +27,13 @@
 ;; (EXECUTING TAKE-ELEVATOR) 
 ;; SOLVED
 
+;; Walking home is the fallback :)
+;; CL-USER> (GPS '(in-class class-over trains-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-HOME-IN-AN-HOUR) 
+;; (EXECUTING THIS-IS-LONGER-THAN-IDEAL) 
+;; (EXECUTING FINALLY-HOME) 
+;; SOLVED
+
 (defvar *state* nil "The current state: a list of conditions.")
 
 (defvar *ops* nil  "A list of available operators.")
@@ -130,11 +137,9 @@
            :preconds '(locked-bike)
            :add-list '(at-home)
            :del-list '(locked-bike))
-  ;;Walk
-  It would be cool to have walking as a back-up plan in case everything else fails. However, I don't know how for the precond to ONLY contain (class over). Right now, it requires the other preconds.
-  ;;   (setf *state* in-class)             
+  ;;Walk - this works as a fallback option in case none of the 3 states are met.
   (make-op :action 'walk-home-in-an-hour
-           :preconds '(member class-over *state*)
+           :preconds '(in-class class-over)
            :add-list '(walking)
            :del-list '(in-class))
   (make-op :action 'this-is-longer-than-ideal
@@ -144,5 +149,6 @@
            :preconds '(walking being-miserable)
            :add-list '(at-home)
            :del-list '(walking being-miserable))
-  ))
+  )
+  )
  
