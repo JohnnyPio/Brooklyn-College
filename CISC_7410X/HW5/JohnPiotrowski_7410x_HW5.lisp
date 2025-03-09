@@ -130,18 +130,19 @@
            :preconds '(locked-bike)
            :add-list '(at-home)
            :del-list '(locked-bike))
-  ;; ;;Walk
-  ;; It would be cool to have walking as a back-up plan in case everything else fails. However, I don't know how for the precond to ONLY contain (class over). Right now, it requires the other preconds.
-  ;; (make-op :action 'walk-home-in-an-hour
-  ;;          :preconds '(member class-over *state*)
-  ;;          :add-list '(walking)
-  ;;          :del-list '(in-class))
-  ;; (make-op :action 'this-is-longer-than-ideal
-  ;;          :preconds '(walking)
-  ;;          :add-list '(being-miserable))
-  ;; (make-op :action 'finally-home
-  ;;          :preconds '(walking being-miserable)
-  ;;          :add-list '(at-home)
-  ;;          :del-list '(walking being-miserable))
+  ;;Walk
+  It would be cool to have walking as a back-up plan in case everything else fails. However, I don't know how for the precond to ONLY contain (class over). Right now, it requires the other preconds.
+  ;;   (setf *state* in-class)             
+  (make-op :action 'walk-home-in-an-hour
+           :preconds '(member class-over *state*)
+           :add-list '(walking)
+           :del-list '(in-class))
+  (make-op :action 'this-is-longer-than-ideal
+           :preconds '(walking)
+           :add-list '(being-miserable))
+  (make-op :action 'finally-home
+           :preconds '(walking being-miserable)
+           :add-list '(at-home)
+           :del-list '(walking being-miserable))
   ))
  
