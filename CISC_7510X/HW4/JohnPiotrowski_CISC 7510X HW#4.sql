@@ -1,6 +1,13 @@
 -- John Piotrowski - HW4 - 7510x
 -- SET search_path = public, "$user", public;
 
+ CREATE TABLE public.daily_prcnt
+(
+    tdate date,
+    symbol varchar(20),
+    prcnt decimal(18,8)
+);
+
 with cts as (
 	select
 		tdate as cts_tdate,

@@ -19,7 +19,7 @@ COPY 8471
 stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
 ERROR:  invalid input syntax for type numeric: ""
 CONTEXT:  COPY cts, line 43398679, column low: ""
--- Had to go delete line 43398679 because there was an empty column and I didn't add handling for NULL (20130819,V,172.33,176.89,,174.98,2995500)
+-- Had to go delete two lines because there was an empty column and I didn't add handling for NULL (20130819,V,172.33,176.89,,174.98,2995500)
 stock_tracking=# COPY cts FROM 'C:\Users\JohnS\Downloads\CS\ctsdata-20140211\cts.dump.csv' DELIMITER ',';
 COPY 44314946
 
@@ -44,12 +44,3 @@ stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('dividend'));
  
 stock_tracking=# SELECT pg_size_pretty(pg_total_relation_size('splits'));
  440 kB
-
- ------ HW 4
-
- CREATE TABLE public.daily_prcnt
-(
-    tdate date,
-    symbol varchar(20),
-    prcnt decimal(18,8)
-);
