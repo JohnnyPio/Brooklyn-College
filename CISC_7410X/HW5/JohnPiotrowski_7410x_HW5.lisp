@@ -3,37 +3,6 @@
 
 ; I want to get home from class. There are three ways I can get home: take the b6 and to the F train - cost $, take the b103 - cost $, or bike - doesn't cost money.
 
-;; CL-USER> (GPS '(in-class class-over trains-running busses-running have-money) '(at-home) *route-ops*)
-;; (EXECUTING WALK-TO-B6) 
-;; (EXECUTING TAKE-B6) 
-;; (EXECUTING ARRIVE-AT-BAY-PARKWAY-STATION) 
-;; (EXECUTING TAKE-F-TRAIN) 
-;; (EXECUTING ARRIVE-AT-CHURCH-AVE) 
-;; (EXECUTING WALK-HOME-FROM-SUBWAY-STATION) 
-;; SOLVED
-
-;; CL-USER> (GPS '(in-class class-over busses-running have-money) '(at-home) *route-ops*)
-;; (EXECUTING WALK-TO-B103) 
-;; (EXECUTING TAKE-B103) 
-;; (EXECUTING ARRIVE-AT-MCDONALD-AVE-BUS-STOP) 
-;; (EXECUTING WALK-HOME-FROM-BUS-STOP) 
-;; SOLVED
-
-;; CL-USER> (GPS '(in-class class-over brought-bike have-key) '(at-home) *route-ops*)
-;; (EXECUTING WALK-TO-BIKE) 
-;; (EXECUTING UNLOCK-BIKE) 
-;; (EXECUTING ARRIVE-AT-BUILDING) 
-;; (EXECUTING LOCK-BIKE) 
-;; (EXECUTING TAKE-ELEVATOR) 
-;; SOLVED
-
-;; Walking home is the fallback :)
-;; CL-USER> (GPS '(in-class class-over trains-running have-money) '(at-home) *route-ops*)
-;; (EXECUTING WALK-HOME-IN-AN-HOUR) 
-;; (EXECUTING THIS-IS-LONGER-THAN-IDEAL) 
-;; (EXECUTING FINALLY-HOME) 
-;; SOLVED
-
 (defvar *state* nil "The current state: a list of conditions.")
 
 (defvar *ops* nil  "A list of available operators.")
@@ -137,7 +106,7 @@
            :preconds '(locked-bike)
            :add-list '(at-home)
            :del-list '(locked-bike))
-  ;;Walk - this works as a fallback option in case none of the 3 states are met.
+  ;;Walk - this works as a fallback option in case none of the 3 other states are met.
   (make-op :action 'walk-home-in-an-hour
            :preconds '(in-class class-over)
            :add-list '(walking)
@@ -148,7 +117,77 @@
   (make-op :action 'finally-home
            :preconds '(walking being-miserable)
            :add-list '(at-home)
-           :del-list '(walking being-miserable))
+           :del-list '(walking being-miserable)))
   )
-  )
- 
+
+;; CL-USER> (GPS '(in-class class-over trains-running busses-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-B6) 
+;; (EXECUTING TAKE-B6) 
+;; (EXECUTING ARRIVE-AT-BAY-PARKWAY-STATION) 
+;; (EXECUTING TAKE-F-TRAIN) 
+;; (EXECUTING ARRIVE-AT-CHURCH-AVE) 
+;; (EXECUTING WALK-HOME-FROM-SUBWAY-STATION) 
+;; SOLVED
+
+;; CL-USER> (GPS '(in-class class-over busses-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-B103) 
+;; (EXECUTING TAKE-B103) 
+;; (EXECUTING ARRIVE-AT-MCDONALD-AVE-BUS-STOP) 
+;; (EXECUTING WALK-HOME-FROM-BUS-STOP) 
+;; SOLVED
+
+;; CL-USER> (GPS '(in-class class-over brought-bike have-key) '(at-home) *route-ops*)
+;; (EXECUTING WALK-TO-BIKE) 
+;; (EXECUTING UNLOCK-BIKE) 
+;; (EXECUTING ARRIVE-AT-BUILDING) 
+;; (EXECUTING LOCK-BIKE) 
+;; (EXECUTING TAKE-ELEVATOR) 
+;; SOLVED
+
+;; Walking home is the fallback :)
+;; CL-USER> (GPS '(in-class class-over trains-running have-money) '(at-home) *route-ops*)
+;; (EXECUTING WALK-HOME-IN-AN-HOUR) 
+;; (EXECUTING THIS-IS-LONGER-THAN-IDEAL) 
+;; (EXECUTING FINALLY-HOME) 
+;; SOLVED
+
+;;;Trying out the GPS example from the book
+
+(defparameter *school-ops*
+  (list
+       (make-op :action 'drive-son-to-school
+                :preconds '(son-at-home car-works)
+                :add-list '(son-at-school)
+                :del-list '(son-at-home))
+       (make-op :action 'shop-installs-battery
+                :preconds '(car-needs-battery shop-knows-problem shop-has-money)
+                :add-list '(car-works))
+       (make-op :action 'tell-shop-problem
+                :preconds '(in-communication-with-shop)
+                :add-list '(shop-knows-problem))
+       (make-op :action 'telephone-shop
+                :preconds '(know-phone-number)
+                :add-list '(in-communication-with-shop))
+       (make-op :action 'look-up-number
+                :preconds '(have-phone-book)
+                :add-list '(know-phone-number))
+       (make-op :action 'give-shop-money
+                :preconds '(have-money)
+                :add-list '(shop-has-money)
+                :del-list '(have-money))))
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money have-phone-book) '(son-at-school) *school-ops*)
+;; (EXECUTING LOOK-UP-NUMBER) 
+;; (EXECUTING TELEPHONE-SHOP) 
+;; (EXECUTING TELL-SHOP-PROBLEM) 
+;; (EXECUTING GIVE-SHOP-MONEY) 
+;; (EXECUTING SHOP-INSTALLS-BATTERY) 
+;; (EXECUTING DRIVE-SON-TO-SCHOOL) 
+;; SOLVED
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money) '(son-at-schoo1) *school-ops*)
+;; NIL
+
+;; CL-USER> (gps '(son-at-home car-works) '(son-at-school) *school-ops*)
+;; (EXECUTING DRIVE-SON-TO-SCHOOL) 
+;; SOLVED
