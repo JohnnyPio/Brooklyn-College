@@ -38,26 +38,19 @@ stock_pairs as (
 		s1.tdate as tdate,
 		s1.symbol as stock_1,
 		s2.symbol as stock_2,
-		CONCAT(s1.symbol,':',s2.symbol) as pair_key,
+		CONCAT(s1.symbol,':',s2.symbol) as stock_pair,
 		s1.shifted_log_value as s1_log,
 		s2.shifted_log_value as s2_log
 	from log_calcs s1
-	left join log_calcs s2 on s1.tdate = s2.tdate and s1.symbol != s2.symbol
+	inner join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
 ),
 pearson_calcs as (
-	select *
+	select
+	stock_pair,
 	corr(s1_log, s2_log) as pearson_monthly_coeff
 	from stock_pairs
-	where pair_key = 'AAPL:MSFT'
-	group by stock_1, stock_2, tdate, s1_log, s2_log, pair_key
+	group by stock_pair
+	order by pearson_monthly_coeff desc
 )
-select *
--- from december_2013
--- from daily_trades_greater_than_10mil
--- from log_calcs
-from pearson_calcs
--- LIMIT 100
-
-
-
-
+	select *
+	from pearson_calcs
