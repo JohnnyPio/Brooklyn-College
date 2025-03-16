@@ -1,26 +1,23 @@
 -- John Piotrowski - HW5 - 7510x
 -- SET search_path = public, "$user", public;
 
-with december_2013 as (
-	select *,
-	COUNT(DISTINCT tdate) as total_trading_days
+with valid_2013_stocks as (
+	select *
 	from daily_prcnt
 	where extract(year from tdate) = 2013
 		and extract(month from tdate) = 12
-		-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
-		and symbol not like '%-%'
+		and symbol not like '%-%' 			-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
 	group by tdate, symbol, prcnt
 	having prcnt is not null
-	order by tdate asc
 ),
 daily_trades_greater_than_10mil as (
 	select
-		december_2013.tdate,
-		december_2013.symbol,
-		december_2013.prcnt
-	from december_2013
-	join cts on december_2013.symbol = cts.symbol and december_2013.tdate = cts.tdate
-	group by december_2013.tdate, december_2013.symbol, december_2013.prcnt, cts.close, cts.volume
+		valid_2013_stocks.tdate,
+		valid_2013_stocks.symbol,
+		valid_2013_stocks.prcnt
+	from valid_2013_stocks
+	join cts on valid_2013_stocks.symbol = cts.symbol and valid_2013_stocks.tdate = cts.tdate
+	group by valid_2013_stocks.tdate, valid_2013_stocks.symbol, valid_2013_stocks.prcnt, cts.close, cts.volume
 	having cts.close * cts.volume > 10000000	-- est. daily trading total
 ),
 min_prcnt_calc as (
@@ -42,14 +39,16 @@ stock_pairs as (
 		s1.shifted_log_value as s1_log,
 		s2.shifted_log_value as s2_log
 	from log_calcs s1
-	inner join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
+	left join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
+	where s1.symbol like '%MSFT%'
 ),
 pearson_calcs as (
 	select
-	stock_pair,
-	corr(s1_log, s2_log) as pearson_monthly_coeff
+		stock_pair,
+		corr(s1_log, s2_log) as pearson_monthly_coeff
 	from stock_pairs
 	group by stock_pair
+	having corr(s1_log, s2_log) is not null
 	order by pearson_monthly_coeff desc
 )
 	select *
