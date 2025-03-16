@@ -5,7 +5,6 @@ with valid_2013_stocks as (
 	select *
 	from daily_prcnt
 	where extract(year from tdate) = 2013
-		and extract(month from tdate) = 12
 		and symbol not like '%-%' 			-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
 	group by tdate, symbol, prcnt
 	having prcnt is not null
@@ -30,7 +29,7 @@ log_calcs as (
 	from daily_trades_greater_than_10mil
 	order by tdate asc, shifted_log_value desc
 ),
-stock_pairs as (
+stock_pairs_2013 as (
 	select
 		s1.tdate as tdate,
 		s1.symbol as stock_1,
@@ -40,16 +39,69 @@ stock_pairs as (
 		s2.shifted_log_value as s2_log
 	from log_calcs s1
 	left join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
-	where s1.symbol like '%MSFT%'
+	where s1.symbol like '%MSFT%' 
+		or s2.symbol like '%MSFT%'
 ),
-pearson_calcs as (
+pearson_calcs_2013 as (
 	select
 		stock_pair,
-		corr(s1_log, s2_log) as pearson_monthly_coeff
-	from stock_pairs
+		corr(s1_log, s2_log) as r
+	from stock_pairs_2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
-	order by pearson_monthly_coeff desc
-)
+	order by r desc
+),
+stock_pairs_dec2013 as (
 	select *
-	from pearson_calcs
+	from stock_pairs_2013
+	where extract(month from tdate) = 12
+),
+pearson_calcs_dec2013 as (
+	select
+		stock_pair,
+		corr(s1_log, s2_log) as r
+	from stock_pairs_dec2013
+	group by stock_pair
+	having corr(s1_log, s2_log) is not null
+	order by r desc
+),
+num_trading_days_2013 as (
+	select count(distinct tdate) as yearly_trading_days
+	from valid_2013_stocks
+),
+num_trading_days_dec2013 as (
+select 
+	distinct tdate as dec_trading_days
+	from valid_2013_stocks
+	where extract(month from tdate) = 12
+),
+avg_daily_prcnt_2013 as (
+	select 
+		symbol, 
+		avg(prcnt) as year_avg_prcnt
+	from daily_trades_greater_than_10mil
+	group by symbol
+),
+avg_daily_prcnt_dec2013 as (
+	select 
+		symbol, 
+		avg(prcnt) as dec_avg_prcnt
+	from daily_trades_greater_than_10mil
+	where extract(month from tdate) = 12
+	group by symbol
+),
+both_avg_daily_prcnts as (
+	select *
+	from avg_daily_prcnt_2013 annual
+	join avg_daily_prcnt_dec2013 dec on dec.symbol = annual.symbol
+)
+select
+	pc.stock_pair,
+	split_part(pc.stock_pair, ':', 1) as stock_1,
+	split_part(pc.stock_pair, ':', 2) as stock_2,
+	pc.r as r_2013
+	-- pcd.r as r_december
+from pearson_calcs_2013 pc
+-- inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
+order by r_2013
+
