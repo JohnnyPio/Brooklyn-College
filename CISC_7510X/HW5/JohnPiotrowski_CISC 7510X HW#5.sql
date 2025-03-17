@@ -6,8 +6,7 @@ with valid_2013_stocks as (
 	from daily_prcnt
 	where extract(year from tdate) = 2013
 		and symbol not like '%-%' 			-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
-	group by tdate, symbol, prcnt
-	having prcnt is not null
+		and prcnt is not null
 ),
 daily_trades_greater_than_10mil as (
 	select
@@ -40,7 +39,7 @@ stock_pairs_2013 as (
 	from log_calcs s1
 	left join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
 	where s1.symbol like '%MSFT%' 
-		or s2.symbol like '%MSFT%'
+		and s2.symbol like '%AAPL%'
 ),
 pearson_calcs_2013 as (
 	select
@@ -49,7 +48,7 @@ pearson_calcs_2013 as (
 	from stock_pairs_2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
-	order by r desc
+	-- order by r desc
 ),
 stock_pairs_dec2013 as (
 	select *
@@ -63,15 +62,14 @@ pearson_calcs_dec2013 as (
 	from stock_pairs_dec2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
-	order by r desc
+	-- order by r desc
 ),
 num_trading_days_2013 as (
 	select count(distinct tdate) as yearly_trading_days
 	from valid_2013_stocks
 ),
 num_trading_days_dec2013 as (
-select 
-	distinct tdate as dec_trading_days
+	select count(distinct tdate) as dec_trading_days
 	from valid_2013_stocks
 	where extract(month from tdate) = 12
 ),
@@ -90,18 +88,31 @@ avg_daily_prcnt_dec2013 as (
 	where extract(month from tdate) = 12
 	group by symbol
 ),
-both_avg_daily_prcnts as (
-	select *
-	from avg_daily_prcnt_2013 annual
-	join avg_daily_prcnt_dec2013 dec on dec.symbol = annual.symbol
+pairs_and_rs as (
+	select
+		pc.stock_pair as stock_pair,
+		split_part(pc.stock_pair, ':', 1) as stock_1,
+		split_part(pc.stock_pair, ':', 2) as stock_2,
+		pc.r as r_2013,
+		pcd.r as r_december
+	from pearson_calcs_2013 pc
+	inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
+	order by r_2013
 )
 select
-	pc.stock_pair,
-	split_part(pc.stock_pair, ':', 1) as stock_1,
-	split_part(pc.stock_pair, ':', 2) as stock_2,
-	pc.r as r_2013
-	-- pcd.r as r_december
-from pearson_calcs_2013 pc
--- inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
-order by r_2013
-
+	stock_pair,
+	r_2013,
+	r_december,
+	stock_1,
+	1000000*(1+(ydp1.year_avg_prcnt/100)*yearly_trading_days) as stock_1_mil_year,
+	1000000*(1+(ddp1.dec_avg_prcnt/100)*dec_trading_days) as stock_1_mil_dec,
+	stock_2,
+	1000000*(1+(ydp2.year_avg_prcnt/100)*yearly_trading_days) as stock_2_mil_year,
+	1000000*(1+(ddp2.dec_avg_prcnt/100)*dec_trading_days) as stock_2_mil_dec
+from pairs_and_rs
+inner join avg_daily_prcnt_2013 ydp1 on ydp1.symbol = stock_1
+inner join avg_daily_prcnt_dec2013 ddp1 on ddp1.symbol = stock_1
+inner join avg_daily_prcnt_2013 ydp2 on ydp2.symbol = stock_2
+inner join avg_daily_prcnt_dec2013 ddp2 on ddp2.symbol = stock_2
+cross join num_trading_days_2013
+cross join num_trading_days_dec2013
