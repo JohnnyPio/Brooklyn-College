@@ -24,9 +24,9 @@ min_prcnt_calc as (
 ),
 log_calcs as (
 	select *,
-	log(prcnt - (select min_prcnt from min_prcnt_calc) + 1) AS shifted_log_value --Doing this to handle negative and zero value prcnts
+	log(prcnt - min_prcnt + 1) AS shifted_log_value --Doing this to handle negative and zero value prcnts
 	from daily_trades_greater_than_10mil
-	order by tdate asc, shifted_log_value desc
+	cross join min_prcnt_calc
 ),
 stock_pairs_2013 as (
 	select
@@ -38,8 +38,8 @@ stock_pairs_2013 as (
 		s2.shifted_log_value as s2_log
 	from log_calcs s1
 	left join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
-	where s1.symbol like '%MSFT%' 
-		and s2.symbol like '%AAPL%'
+	-- where s1.symbol like '%MSFT%' 
+	-- 	and s2.symbol like '%AAPL%'
 ),
 pearson_calcs_2013 as (
 	select
@@ -48,7 +48,6 @@ pearson_calcs_2013 as (
 	from stock_pairs_2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
-	-- order by r desc
 ),
 stock_pairs_dec2013 as (
 	select *
@@ -62,7 +61,6 @@ pearson_calcs_dec2013 as (
 	from stock_pairs_dec2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
-	-- order by r desc
 ),
 num_trading_days_2013 as (
 	select count(distinct tdate) as yearly_trading_days
@@ -97,18 +95,13 @@ pairs_and_rs as (
 		pcd.r as r_december
 	from pearson_calcs_2013 pc
 	inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
-	order by r_2013
 )
 select
 	stock_pair,
 	r_2013,
 	r_december,
-	stock_1,
-	1000000*(1+(ydp1.year_avg_prcnt/100)*yearly_trading_days) as stock_1_mil_year,
-	1000000*(1+(ddp1.dec_avg_prcnt/100)*dec_trading_days) as stock_1_mil_dec,
-	stock_2,
-	1000000*(1+(ydp2.year_avg_prcnt/100)*yearly_trading_days) as stock_2_mil_year,
-	1000000*(1+(ddp2.dec_avg_prcnt/100)*dec_trading_days) as stock_2_mil_dec
+	500000*(1+(ydp1.year_avg_prcnt/100)*yearly_trading_days) + 500000*(1+(ydp2.year_avg_prcnt/100)*yearly_trading_days) as invested_1mil_all2013,
+	500000*(1+(ddp1.dec_avg_prcnt/100)*dec_trading_days) + 500000*(1+(ddp2.dec_avg_prcnt/100)*dec_trading_days) as invested_1mil_dec2013
 from pairs_and_rs
 inner join avg_daily_prcnt_2013 ydp1 on ydp1.symbol = stock_1
 inner join avg_daily_prcnt_dec2013 ddp1 on ddp1.symbol = stock_1
@@ -116,3 +109,5 @@ inner join avg_daily_prcnt_2013 ydp2 on ydp2.symbol = stock_2
 inner join avg_daily_prcnt_dec2013 ddp2 on ddp2.symbol = stock_2
 cross join num_trading_days_2013
 cross join num_trading_days_dec2013
+order by r_2013 desc
+LIMIT 100
