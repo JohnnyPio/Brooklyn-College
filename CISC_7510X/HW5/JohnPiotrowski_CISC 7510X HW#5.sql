@@ -2,16 +2,18 @@
 -- SET search_path = public, "$user", public;
 
 with num_trading_days_2013 as (
-	select count(distinct tdate) as yearly_trading_days
-	from daily_prcnt
+    select symbol, 
+	count(distinct tdate) as yearly_trading_days
+    from daily_prcnt
 	where extract(year from tdate) = 2013
 	group by symbol
 ),
 num_trading_days_dec2013 as (
-	select count(distinct tdate) as dec_trading_days
+    select symbol, 
+	count(distinct tdate) as dec_trading_days
 	from daily_prcnt
 	where extract(year from tdate) = 2013
-	and extract(month from tdate) = 12
+		and extract(month from tdate) = 12
 	group by symbol
 ),
 valid_2013_stocks as (
@@ -21,7 +23,7 @@ valid_2013_stocks as (
 		and symbol not like '%-%' 			-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
 		and prcnt is not null
 ),
-min_max_tdate_per_symbol as (
+min_max_tmonth_per_symbol as (
     select symbol, 
 	extract(month from min(tdate)) as first_trade_month,
 	extract(month from max(tdate)) as last_trade_month
@@ -32,12 +34,10 @@ daily_trades_greater_than_10mil as (
 	select
 		valid_2013_stocks.tdate,
 		valid_2013_stocks.symbol,
-		valid_2013_stocks.prcnt,
-		first_trade_month,
-		last_trade_month
+		valid_2013_stocks.prcnt
 	from valid_2013_stocks
 	join cts on valid_2013_stocks.symbol = cts.symbol and valid_2013_stocks.tdate = cts.tdate
-	join min_max_tdate_per_symbol on valid_2013_stocks.symbol = min_max_tdate_per_symbol.symbol
+	join min_max_tmonth_per_symbol on valid_2013_stocks.symbol = min_max_tmonth_per_symbol.symbol
 	group by valid_2013_stocks.symbol, valid_2013_stocks.tdate, valid_2013_stocks.prcnt, cts.close, cts.volume, first_trade_month, last_trade_month
 	having cts.close * cts.volume > 10000000	-- est. daily trading total
 		and first_trade_month = 1				-- Filter out stocks that weren't trading in Jan 2013 like 'ATHM'
@@ -114,15 +114,17 @@ calculate_investments as (
 	select
 		stock_pair,
 		-- These both need be per symbol as some stocks were traded on different days
-		500000*(1+(ydp1.year_avg_prcnt/100)*yearly_trading_days) + 500000*(1+(ydp2.year_avg_prcnt/100)*yearly_trading_days) as invested_1mil_all2013,
-		500000*(1+(ddp1.dec_avg_prcnt/100)*dec_trading_days) + 500000*(1+(ddp2.dec_avg_prcnt/100)*dec_trading_days) as invested_1mil_dec2013
+		500000*(1+(ydp1.year_avg_prcnt/100)*ntd1.yearly_trading_days) + 500000*(1+(ydp2.year_avg_prcnt/100)*ntd2.yearly_trading_days) as invested_1mil_all2013,
+		500000*(1+(ddp1.dec_avg_prcnt/100)*ntdd1.dec_trading_days) + 500000*(1+(ddp2.dec_avg_prcnt/100)*ntdd2.dec_trading_days) as invested_1mil_dec2013
 	from pairs_and_rs
 	join avg_daily_prcnt_2013 ydp1 on ydp1.symbol = stock_1
-	join avg_daily_prcnt_dec2013 ddp1 on ddp1.symbol = stock_1
 	join avg_daily_prcnt_2013 ydp2 on ydp2.symbol = stock_2
+	join avg_daily_prcnt_dec2013 ddp1 on ddp1.symbol = stock_1
 	join avg_daily_prcnt_dec2013 ddp2 on ddp2.symbol = stock_2
-	cross join num_trading_days_2013
-	cross join num_trading_days_dec2013
+	join num_trading_days_2013 ntd1 on ntd1.symbol = stock_1
+	join num_trading_days_2013 ntd2 on ntd2.symbol = stock_2
+	join num_trading_days_dec2013 ntdd1 on ntdd1.symbol = stock_1
+	join num_trading_days_dec2013 ntdd2 on ntdd2.symbol = stock_2
 )
 -- select
 -- 	prs.stock_pair,
@@ -134,14 +136,14 @@ calculate_investments as (
 -- 	ci.invested_1mil_dec2013
 -- 	from pairs_and_rs prs
 -- 	join calculate_investments ci on ci.stock_pair = prs.stock_pair
--- 		where stock_1 like '%MSFT%'
--- 		and stock_1 like '%GOOG%'
+-- 	where stock_1 like '%MSFT%'
+-- 		or stock_1 like '%GOOG%'
+-- 		or stock_1 like '%ATHM%'
 -- 	order by ci.invested_1mil_dec2013 desc
 -- 	limit 10
 
 select *
-from daily_trades_greater_than_10mil
+from num_trading_days_2013
 where symbol like '%MSFT%'
 	or symbol like '%GOOG%'
 	or symbol like '%ATHM%'
-	
