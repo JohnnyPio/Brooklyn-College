@@ -1,27 +1,20 @@
 -- John Piotrowski - HW5 - 7510x
 -- SET search_path = public, "$user", public;
 
-with num_trading_days_2013 as (
+with num_trading_days  as (
     select symbol, 
-	count(distinct tdate) as yearly_trading_days
+        count(distinct tdate) as yearly_trading_days,
+        count(distinct case when extract(month from tdate) = 12 then tdate end) as dec_trading_days
     from daily_prcnt
-	where extract(year from tdate) = 2013
-	group by symbol
-),
-num_trading_days_dec2013 as (
-    select symbol, 
-	count(distinct tdate) as dec_trading_days
-	from daily_prcnt
-	where extract(year from tdate) = 2013
-		and extract(month from tdate) = 12
-	group by symbol
+    where extract(year from tdate) = 2013
+    group by symbol
 ),
 valid_2013_stocks as (
 	select *
 	from daily_prcnt
 	where extract(year from tdate) = 2013
 		and symbol not like '%-%' 			-- Filter out pink sheets and OTC Bulletin Board and other dashed symbols
-		and prcnt is not null
+		and prcnt is not null				-- @TODO maybe we want to move this into daily_trades 
 ),
 min_max_tmonth_per_symbol as (
     select symbol, 
@@ -38,6 +31,9 @@ daily_trades_greater_than_10mil as (
 	from valid_2013_stocks
 	join cts on valid_2013_stocks.symbol = cts.symbol and valid_2013_stocks.tdate = cts.tdate
 	join min_max_tmonth_per_symbol on valid_2013_stocks.symbol = min_max_tmonth_per_symbol.symbol
+	where valid_2013_stocks.symbol = 'MSFT' 
+		or valid_2013_stocks.symbol = 'GOOG' 
+		or valid_2013_stocks.symbol = 'ATHM' 
 	group by valid_2013_stocks.symbol, valid_2013_stocks.tdate, valid_2013_stocks.prcnt, cts.close, cts.volume, first_trade_month, last_trade_month
 	having cts.close * cts.volume > 10000000	-- est. daily trading total
 		and first_trade_month = 1				-- Filter out stocks that weren't trading in Jan 2013 like 'ATHM'
@@ -109,41 +105,36 @@ pairs_and_rs as (
 		pcd.r as r_december
 	from pearson_calcs_2013 pc
 	inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
+	where pc.stock_pair = 'MSFT:GOOG'
 ),
 calculate_investments as (
 	select
 		stock_pair,
-		-- These both need be per symbol as some stocks were traded on different days
-		500000*(1+(ydp1.year_avg_prcnt/100)*ntd1.yearly_trading_days) + 500000*(1+(ydp2.year_avg_prcnt/100)*ntd2.yearly_trading_days) as invested_1mil_all2013,
-		500000*(1+(ddp1.dec_avg_prcnt/100)*ntdd1.dec_trading_days) + 500000*(1+(ddp2.dec_avg_prcnt/100)*ntdd2.dec_trading_days) as invested_1mil_dec2013
+		500000*(1+(ydp1.year_avg_prcnt/100)*252) + 500000*(1+(ydp2.year_avg_prcnt/100)*252) as invested_1mil_all2013,
+		500000*(1+(ddp1.dec_avg_prcnt/100)*22) + 500000*(1+(ddp2.dec_avg_prcnt/100)*22) as invested_1mil_dec2013
 	from pairs_and_rs
 	join avg_daily_prcnt_2013 ydp1 on ydp1.symbol = stock_1
 	join avg_daily_prcnt_2013 ydp2 on ydp2.symbol = stock_2
 	join avg_daily_prcnt_dec2013 ddp1 on ddp1.symbol = stock_1
 	join avg_daily_prcnt_dec2013 ddp2 on ddp2.symbol = stock_2
-	join num_trading_days_2013 ntd1 on ntd1.symbol = stock_1
-	join num_trading_days_2013 ntd2 on ntd2.symbol = stock_2
-	join num_trading_days_dec2013 ntdd1 on ntdd1.symbol = stock_1
-	join num_trading_days_dec2013 ntdd2 on ntdd2.symbol = stock_2
+	-- join num_trading_days_2013 ntd1 on ntd1.symbol = stock_1
+	-- join num_trading_days_2013 ntd2 on ntd2.symbol = stock_2
+	-- join num_trading_days_dec2013 ntdd1 on ntdd1.symbol = stock_1
+	-- join num_trading_days_dec2013 ntdd2 on ntdd2.symbol = stock_2
 )
--- select
--- 	prs.stock_pair,
--- 	stock_1,
--- 	stock_2,
--- 	r_2013,
--- 	r_december,
--- 	ci.invested_1mil_all2013,
--- 	ci.invested_1mil_dec2013
--- 	from pairs_and_rs prs
--- 	join calculate_investments ci on ci.stock_pair = prs.stock_pair
--- 	where stock_1 like '%MSFT%'
--- 		or stock_1 like '%GOOG%'
--- 		or stock_1 like '%ATHM%'
--- 	order by ci.invested_1mil_dec2013 desc
--- 	limit 10
+select
+	prs.stock_pair,
+	stock_1,
+	stock_2,
+	r_2013,
+	r_december,
+	ci.invested_1mil_all2013,
+	ci.invested_1mil_dec2013
+	from pairs_and_rs prs
+	join calculate_investments ci on ci.stock_pair = prs.stock_pair
+	order by ci.invested_1mil_dec2013 desc
+	limit 100
 
-select *
-from num_trading_days_2013
-where symbol like '%MSFT%'
-	or symbol like '%GOOG%'
-	or symbol like '%ATHM%'
+-- select *
+-- from num_trading_days_2013
+-- where symbol like '%GOOG%'
