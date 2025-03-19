@@ -55,7 +55,8 @@ log_calcs as (
 	from daily_trades_greater_than_10mil
 	cross join min_prcnt_calc
 ),
-stock_pairs_2013 as (
+-- Seems to hit the quantity problem here which makes sense, should use the Dec data first, then pull the 2013 data based on that data instead of the other way around
+stock_pairs_dec_2013 as (
 	select
 		s1.tdate as tdate,
 		s1.symbol as stock_1,
@@ -65,28 +66,29 @@ stock_pairs_2013 as (
 		s2.shifted_log_value as s2_log
 	from log_calcs s1
 	left join log_calcs s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
-),
-pearson_calcs_2013 as (
-	select
-		stock_pair,
-		corr(s1_log, s2_log) as r
-	from stock_pairs_2013
-	group by stock_pair
-	having corr(s1_log, s2_log) is not null
-),
-stock_pairs_dec2013 as (
-	select *
-	from stock_pairs_2013
-	where extract(month from tdate) = 12
+	where extract(month from s1.tdate) = 12
 ),
 pearson_calcs_dec2013 as (
 	select
 		stock_pair,
 		corr(s1_log, s2_log) as r
-	from stock_pairs_dec2013
+	from stock_pairs_dec_2013
 	group by stock_pair
 	having corr(s1_log, s2_log) is not null
 ),
+-- pearson_calcs_2013 as (
+-- 	select
+-- 		stock_pair,
+-- 		corr(s1_log, s2_log) as r
+-- 	from stock_pairs_2013
+-- 	group by stock_pair
+-- 	having corr(s1_log, s2_log) is not null
+-- ),
+-- stock_pairs_dec2013 as (
+-- 	select *
+-- 	from stock_pairs_2013
+-- 	where extract(month from tdate) = 12
+-- ),
 avg_daily_prcnt_2013 as (
 	select 
 		symbol, 
@@ -104,13 +106,13 @@ avg_daily_prcnt_dec2013 as (
 ),
 pairs_and_rs as (
 	select
-		pc.stock_pair as stock_pair,
-		split_part(pc.stock_pair, ':', 1) as stock_1,
-		split_part(pc.stock_pair, ':', 2) as stock_2,
-		pc.r as r_2013,
+		pcd.stock_pair as stock_pair,
+		split_part(pcd.stock_pair, ':', 1) as stock_1,
+		split_part(pcd.stock_pair, ':', 2) as stock_2,
 		pcd.r as r_december
-	from pearson_calcs_2013 pc
-	inner join pearson_calcs_dec2013 pcd on pcd.stock_pair = pc.stock_pair
+		-- pc.r as r_2013
+	from pearson_calcs_dec2013 pcd 
+	-- join pearson_calcs_2013 pc on pc.stock_pair = pcd.stock_pair
 ),
 calculate_investments as (
 	select
@@ -127,9 +129,9 @@ select
 	prs.stock_pair,
 	stock_1,
 	stock_2,
-	r_2013,
+	-- r_2013,
 	r_december,
-	ci.invested_1mil_all2013
+	ci.invested_1mil_all2013,
 	ci.invested_1mil_dec2013
 	from pairs_and_rs prs
 	join calculate_investments ci on ci.stock_pair = prs.stock_pair
@@ -137,7 +139,7 @@ select
 	limit 50
 
 -- select *
--- -- from min_max_trade_month_per_symbol
--- -- from num_trading_days
+-- -- from pearson_calcs_2013
+-- -- from stock_pairs_dec_2013
 -- -- from valid_2013_stocks
--- from daily_trades_greater_than_10mil
+-- from num_trading_days
