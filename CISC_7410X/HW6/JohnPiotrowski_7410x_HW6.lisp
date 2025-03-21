@@ -1,7 +1,7 @@
 ;John Piotrowski - 7410x - HW6
-;GPS
+;GPS v2
 
-(defvar *state* nil "The current state: a list of conditions.")
+;(defvar *state* nil "The current state: a list of conditions.")
 
 (defvar *ops* nil  "A list of available operators.")
 
@@ -9,9 +9,13 @@
   "An operation."
   (action nil) (preconds nil) (add-list nil) (del-list nil))
 
-(defun GPS (*state* goals *ops*)
-  "General Problem Solver: achieve all goals using *ops*."
-  (if (every #'achieve goals) 'solved))
+(defun GPS (state goals &optional (*ops* *ops*))
+  "General Problem Solver: from state, achieve goals using *ops*."
+  (remove-if #'atom (achieve-all (cons '(start) state) goals nil)))
+
+(defun achieve-all (goals)
+  "Try to achieve each goal, then make sure they still hold."
+  (and (every #'achieve goals) (subsetp goals *state*))) 
 
 (defun find-all (item sequence &rest keyword-args  &key (test #'eql) test-not &allow-other-keys)
   "Find all those elements of sequence that match item, according to the keywords. Doesn't alter sequence."
@@ -38,4 +42,25 @@
     (setf *state* (set-difference *state* (op-del-list op)))
     (setf *state* (union *state* (op-add-list op)))
     t))
+
+(defun executing-p (x)
+  "Is x of the form: (executing ... ) ?"
+  (starts-with x 'executing))
+
+(defun starts-with (list x)
+  "Is this a list whose first element is x?"
+  (and (consp list) (eql (first list) x)))
+
+(defun convert-op (op)
+  "Make op conform to the (EXECUTING op) convention."
+  (unless (some #'executing-p (op-add-list op))
+    (push (list 'executing (op-action op)) (op-add-list op)))
+  op)
+
+(defun op (action &key preconds add-list del-list)
+  "Make a new operator that obeys the (EXECUTING op) convention."
+  (convert-op
+   (make-op :action action :preconds preconds
+            :add-list add-list :del-list del-list)))
+
 

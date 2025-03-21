@@ -1,0 +1,33 @@
+"C:\Users\JohnS\portacle\config\user.el"
+
+;;; Spaces
+C-space : starts the highlight
+
+;;; Parenthesis
+;Add
+M-( : adds a level
+
+;Delete
+Remove a single paren: highlight and then use delete-rectangle (C-x r d)
+Before a pair: M-x delete-pair
+Inside a pair: C-M-u for backing out of the pair and then M-x delete-pair.
+Behind a pair: M-- (negative argument) and then M-x delete-pair
+
+;;; Buffers
+C-x b : create new buffer
+C-x -> : switch buffers to the right
+C-x 2 : Add vertical-tiled buffer
+C-x 3 : Add horizontal-tiled buffer
+C-x 0 : Remove buffer window
+M-x slime-repl : Add slime-repl sbcl
+
+
+;;; Compile
+C-x s : save file
+C-c C-k : compile whole file
+C-x C-e : Evaluate expression at the end
+C-c C-y : copy last function into the repl
+
+;;;Help
+C-h C-h : open help and show all the C-h + (key) commands
+C-h t : open tutorial
