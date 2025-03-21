@@ -1,7 +1,9 @@
-;John Piotrowski - 7410x - HW6
-;GPS v2
+;;John Piotrowski - 7410x - HW6
+;;GPS v2
 
-;; Top-Level Function
+;; Order
+
+;;Top-Level Function
 (defun GPS (state goals &optional (*ops* *ops*))
   "General Problem Solver: from state, achieve goals using *ops*."
   (remove-if #'atom (achieve-all (cons '(start) state) goals nil)))
@@ -79,8 +81,7 @@
   op)
 
 (defun op (action &key preconds add-list del-list)
-  "Make a new operator that obeys the (EXECUTING op)
- convention."
+  "Make a new operator that obeys the (EXECUTING op) convention."
   (convert-op
    (make-op :action action :preconds preconds
             :add-list add-list :del-list del-list)))
@@ -97,6 +98,12 @@
 ;;Debugging
 (defvar *dbg-ids* nil "Identifiers used by dbg")
 
+(defun dbg (id format-string &rest args)
+  "Print debugging info if (DEBUG ID) has been specified."
+  (when (member id *dbg-ids*)
+    (fresh-line *debug-io*)
+    (apply #'format *debug-io* format-string args)))
+
 (defun dbg-indent (id indent format-string &rest args)
   "Print indented debugging info if (DEBUG ID) has been specified."
   (when (member id *dbg-ids*)
@@ -104,11 +111,20 @@
     (dotimes (i indent) (princ " " *debug-io*))
     (apply #'format *debug-io* format-string args)))
 
+(defun debug2 (&rest ids)
+  ;; I had to change the name as 'debug' was giving me [Condition of type SYMBOL-PACKAGE-LOCKED-ERROR] on compile.
+  "Start dbg output on the given ids."
+  (setf *dbg-ids* (union ids *dbg-ids*)))
+
+(defun undebug (&rest ids)
+  "Stop dbg on the ids. With no ids, stop dbg altogether."
+  (setf *dbg-ids* (if (null ids) nil
+                      (set-difference *dbg-ids* ids))))
+
+
+;;Operators
 (defparameter *school-ops*
   (list
-   (make-op :action 'ask-phone-number
-            :preconds '(in-communication-with-shop)
-            :add-list '(know-phone-number))
    (make-op :action 'drive-son-to-school
             :preconds '(son-at-home car-works)
             :add-list '(son-at-school)
@@ -128,5 +144,116 @@
    (make-op :action 'give-shop-money
             :preconds '(have-money)
             :add-list '(shop-has-money)
-            :del-list '(have-money)))
+            :del-list '(have-money))
+   (make-op :action 'ask-phone-number
+            :preconds '(in-communication-with-shop)
+            :add-list '(know-phone-number))
    )
+  )
+
+(mapc #'convert-op *school-ops*)
+
+(defparameter *banana-ops*
+  (list
+       (op 'climb-on-chair
+           :preconds '(chair-at-middle-room at-middle-room on-floor)
+           :add-list '(at-bananas on-chair)
+           :del-list '(at-middle-room on-floor))
+       (op 'push-chair-from-door-to-middle-room
+           :preconds '(chair-at-door at-door)
+           :add-list '(chair-at-middle-room at-middle-room)
+           :del-list '(chair-at-door at-door))
+       (op 'walk-from-door-to-middle-room
+           :preconds '(at-door on-floor)
+           :add-list '(at-middle-room)
+           :del-list '(at-door))
+       (op 'grasp-bananas
+           :preconds '(at-bananas empty-handed)
+           :add-list '(has-bananas)
+           :del-list '(empty-handed))
+       (op 'drop-ball
+           :preconds '(has-ball)
+           :add-list '(empty-handed)
+           :del-list '(has-balD )
+       (op 'eat-bananas
+           :preconds '(has-bananas)
+           :add-list '(empty-handed not-hungry)
+           :del-list '(has-bananas hungry)))) 
+
+;;;;;Outputs - Drive son to school 
+;; CL-USER> (use *school-ops*)
+;; 7
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money have-phone-book) '(son-at-school))
+;; 0: (GPS (SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) (SON-AT-SCHOOL))
+;; 0: GPS returned
+;; ((START) (EXECUTING LOOK-UP-NUMBER) (EXECUTING TELEPHONE-SHOP)
+;;          (EXECUTING TELL-SHOP-PROBLEM) (EXECUTING GIVE-SHOP-MONEY)
+;;          (EXECUTING SHOP-INSTALLS-BATTERY) (EXECUTING DRIVE-SON-TO-SCHOOL))
+;; ((START) (EXECUTING LOOK-UP-NUMBER) (EXECUTING TELEPHONE-SHOP)
+;;          (EXECUTING TELL-SHOP-PROBLEM) (EXECUTING GIVE-SHOP-MONEY)
+;;          (EXECUTING SHOP-INSTALLS-BATTERY) (EXECUTING DRIVE-SON-TO-SCHOOL))
+
+;; CL-USER> (debug2 :gps)
+;; (:GPS)
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money have-phone-book) '(son-at-school))
+;; 0: (GPS (SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) (SON-AT-SCHOOL))
+;; Goal: SON-AT-SCHOOL 
+;; Consider: DRIVE-SON-TO-SCHOOL
+;; Goal: SON-AT-HOME 
+;; Goal: CAR-WORKS 
+;; Consider: SHOP-INSTALLS-BATTERY
+;; Goal: CAR-NEEDS-BATTERY 
+;; Goal: SHOP-KNOWS-PROBLEM 
+;; Consider: TELL-SHOP-PROBLEM
+;; Goal: IN-COMMUNICATION-WITH-SHOP 
+;; Consider: TELEPHONE-SHOP
+;; Goal: KNOW-PHONE-NUMBER 
+;; Consider: LOOK-UP-NUMBER
+;; Goal: HAVE-PHONE-BOOK 
+;; Action: LOOK-UP-NUMBER
+;; Action: TELEPHONE-SHOP
+;; Action: TELL-SHOP-PROBLEM
+;; Goal: SHOP-HAS-MONEY 
+;; Consider: GIVE-SHOP-MONEY
+;; Goal: HAVE-MONEY 
+;; Action: GIVE-SHOP-MONEY
+;; Action: SHOP-INSTALLS-BATTERY
+;; Action: DRIVE-SON-TO-SCHOOL  0: GPS returned
+;; ((START) (EXECUTING LOOK-UP-NUMBER) (EXECUTING TELEPHONE-SHOP)
+;;          (EXECUTING TELL-SHOP-PROBLEM) (EXECUTING GIVE-SHOP-MONEY)
+;;          (EXECUTING SHOP-INSTALLS-BATTERY) (EXECUTING DRIVE-SON-TO-SCHOOL))
+;; ((START) (EXECUTING LOOK-UP-NUMBER) (EXECUTING TELEPHONE-SHOP)
+;;          (EXECUTING TELL-SHOP-PROBLEM) (EXECUTING GIVE-SHOP-MONEY)
+;;          (EXECUTING SHOP-INSTALLS-BATTERY) (EXECUTING DRIVE-SON-TO-SCHOOL))
+
+;; CL-USER> (undebug)
+;; NIL
+
+;; CL-USER> (gps '(son-at-home car-works) '(son-at-school))
+;; 0: (GPS (SON-AT-HOME CAR-WORKS) (SON-AT-SCHOOL))
+;; 0: GPS returned ((START) (EXECUTING DRIVE-SON-TO-SCHOOL))
+;; ((START) (EXECUTING DRIVE-SON-TO-SCHOOL))
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money have-phone-book) '(have-money son-at-school))
+;; 0: (GPS (SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) (HAVE-MONEY SON-AT-SCHOOL))
+;; 0: GPS returned NIL
+;; NIL
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money have-phone-book) '(son-at-school have-money))
+;; 0: (GPS (SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) (SON-AT-SCHOOL HAVE-MONEY))
+;; 0: GPS returned NIL
+;; NIL
+
+;; CL-USER> (gps '(son-at-home car-needs-battery have-money) '(son-at-school))
+;; 0: (GPS (SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY) (SON-AT-SCHOOL))
+;; 0: GPS returned NIL
+;; NIL
+
+;; CL-USER> (gps '(son-at-home) '(son-at-home))
+;; 0: (GPS (SON-AT-HOME) (SON-AT-HOME))
+;; 0: GPS returned ((START))
+;; ((START)
+
+;;;;;Outputs - Monkey and Bananas
