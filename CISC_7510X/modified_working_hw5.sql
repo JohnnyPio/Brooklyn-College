@@ -12,7 +12,7 @@ valid_stocks_dec as (
 	select * 
 	from valid_stocks_2013
 	where extract(month from tdate) = 12
-	and symbol in ('TSEM','PATH','CALI','BGMD','ELMD','ALIM','OCLS')
+--	and symbol in ('TSEM','PATH','CALI','BGMD','ELMD','ALIM','OCLS')
 ),
 min_trade_month_per_symbol as (
     select 
@@ -61,7 +61,7 @@ best_stocks_as_list_dec as (
     select stock_2 as stock from best_10_stock_pairs_dec
     order by stock
 ),
-filtered_prcnt as (
+filtered_prcnt_dec as (
 	select *
 	from valid_stocks_dec v
 	join best_stocks_as_list_dec l on v.symbol = l.stock
@@ -69,12 +69,12 @@ filtered_prcnt as (
 min_prcnt_calc_dec as (
 	select 
 	min(prcnt) as min_prcnt_dec
-	from filtered_prcnt
+	from filtered_prcnt_dec
 ),
 log_calcs_dec as (
 	select *,
 	log(prcnt - min_prcnt_dec + 1) AS shifted_log_value --Doing this to handle negative and zero value prcnts
-	from filtered_prcnt
+	from filtered_prcnt_dec
 	cross join min_prcnt_calc_dec
 ),
 stock_pairs_logs_dec as (
@@ -108,16 +108,79 @@ investment_calcs_dec as (
 		best.stock_1,
 		best.stock_2,
 		best.invested_1mil_dec2013,
-		pcs.r_dec
+		pcs1.r_dec
 	from best_10_stock_pairs_dec best
-	left join pearson_calcs_dec pcs on pcs.stock_pair = best.stock_pair
+	left join pearson_calcs_dec pcs1 on pcs1.stock_pair = best.stock_pair
+	order by invested_1mil_dec2013 desc
+),
+-- 2013 onlys
+filtered_prcnt_2013 as (
+	select *
+	from valid_stocks_2013 v
+	join best_stocks_as_list_dec l on v.symbol = l.stock
+),
+min_prcnt_calc_2013 as (
+	select 
+	min(prcnt) as min_prcnt_dec
+	from filtered_prcnt_2013
+),
+log_calcs_2013 as (
+	select *,
+	log(prcnt - min_prcnt_dec + 1) AS shifted_log_value --Doing this to handle negative and zero value prcnts
+	from filtered_prcnt_2013
+	cross join min_prcnt_calc_2013
+),
+stock_pairs_logs_2013 as (
+	select
+		s1.tdate,
+		s2.tdate,
+		stock_1,
+		stock_2,
+		stock_pair,
+		invested_1mil_dec2013,
+		s1.shifted_log_value as s1_log,
+		s2.shifted_log_value as s2_log
+	from best_10_stock_pairs_dec best
+	join log_calcs_2013 s1 on stock_1 = s1.symbol
+	join log_calcs_2013 s2 on stock_2 = s2.symbol
+	where s1.tdate = s2.tdate
+),
+pearson_calcs_2013 as (
+	select
+		stock_1,
+		stock_2,
+		stock_pair,
+		corr(s1_log, s2_log) as r_2013
+	from stock_pairs_logs_2013
+	group by stock_pair, stock_1, stock_2
+	having corr(s1_log, s2_log) is not null
+),
+avg_daily_prcnt_2013 as (
+	select 
+		symbol, 
+		avg(prcnt) as year_avg_prcnt
+	from filtered_prcnt_2013
+	join best_stocks_as_list_dec best on symbol = best.stock
+	group by symbol
+),
+investment_calcs_final as (
+	select
+		icd.stock_pair,
+		icd.stock_1,
+		icd.stock_2,
+		icd.invested_1mil_dec2013,
+		icd.r_dec,
+		500000*(1+(ydp1.year_avg_prcnt/100)*252) + 500000*(1+(ydp2.year_avg_prcnt/100)*252) as invested_1mil_all2013,
+		pcs2.r_2013
+	from investment_calcs_dec icd
+	left join pearson_calcs_2013 pcs2 on pcs2.stock_pair = icd.stock_pair
+	join avg_daily_prcnt_2013 ydp1 on ydp1.symbol = icd.stock_1
+	join avg_daily_prcnt_2013 ydp2 on ydp2.symbol = icd.stock_2
 	order by invested_1mil_dec2013 desc
 )
-select * from investment_calcs_dec
+select * from investment_calcs_final
 
 
-
--- 2013 onlys
 --stock_pairs_2013 as (
 --	select
 --		s1.tdate as tdate,
@@ -130,29 +193,6 @@ select * from investment_calcs_dec
 --	from log_calcs_dec s1
 --	join log_calcs_dec s2 on s2.tdate = s1.tdate and s2.symbol < s1.symbol
 --),
---trades_above_10mil_2013 as (
---	select
---		valid_stocks_2013.tdate,
---		valid_stocks_2013.symbol,
---		valid_stocks_2013.prcnt
---	from valid_stocks_2013
---	join cts on valid_stocks_2013.symbol = cts.symbol and valid_stocks_2013.tdate = cts.tdate
---	group by valid_stocks_2013.tdate, valid_stocks_2013.symbol, valid_stocks_2013.prcnt, cts.close, cts.volume
---	having cts.close * cts.volume > 10000000	-- est. daily trading total
---),
---min_prcnt_calc_2013 as (
---	select
---		min(prcnt) as min_prcnt_2013
---	from valid_stocks_2013 v
---	join best_pairs_dec best on best.stock = v.symbol
---),
---log_calcs_2013 as (
---	select *,
---	log(prcnt - min_prcnt_2013 + 1) AS shifted_log_value --Doing this to handle negative and zero value prcnts
---	from trades_above_10mil_2013 t
---	join best_pairs_dec best on best.stock = t.symbol
---	cross join min_prcnt_calc_2013
---),
 --pearson_calcs_2013 as (
 --	select
 --		sp.stock_pair,
@@ -161,13 +201,6 @@ select * from investment_calcs_dec
 --	join investment_calcs_dec icd on icd.stock_pair = sp.stock_pair
 --	group by sp.stock_pair
 --	having corr(s1_log, s2_log) is not null
---),
---avg_daily_prcnt_2013 as (
---	select 
---		symbol, 
---		avg(prcnt) as year_avg_prcnt
---	from trades_above_10mil_2013
---	group by symbol
 --),
 --investment_calcs_2013 as (
 --	select
