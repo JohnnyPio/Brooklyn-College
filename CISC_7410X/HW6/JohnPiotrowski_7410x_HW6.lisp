@@ -4,7 +4,7 @@
 ;; Order
 
 ;;Top-Level Function
-;;Modified these names at maze to not conflict with updated GPS
+;;Modified these names at Maze to not conflict with updated GPS
 (defun GPS_unbound (state goals &optional (*ops* *ops*))
   "General Problem Solver: from state, achieve goals using *ops*."
   (remove-if #'atom (achieve-all (cons '(start) state) goals nil)))
@@ -31,7 +31,8 @@
 
 
 ;;Major Functions
-(defun achieve-all (state goals goal-stack)
+;;Modified the below two functions to avoid conflict with the Maze functions
+(defun achieve-all_v2.1 (state goals goal-stack)
   "Achieve each goal, and make sure they still hold at the end."
   (let ((current-state state))
     (if (and (every #'(lambda (g)
@@ -41,7 +42,7 @@
              (subsetp goals current-state :test #'equal))
         current-state)))
 
-(defun achieve (state goal goal-stack)
+(defun achieve_v2.1 (state goal goal-stack)
   "A goal is achieved if it already holds, or if there is an appropriate op for it that is applicable."
   (dbg-indent :gps (length goal-stack) "Goal: ~a " goal)
   (cond ((member-equal goal state) state)
@@ -361,4 +362,197 @@
      `((,a on ,c))
      `((,a on ,c) (space on ,b))))
 
+(defun achieve-all (state goals goal-stack)
+  "Achieve each goal, trying several orderings."
+  (some #'(lambda (goals) (achieve-each state goals goal-stack))
+        (orderings goals)))
+
+(defun achieve-each (state goals goal-stack)
+  "Achieve each goal, and make sure they still hold at the end."
+  (let ((current-state state))
+    (if (and (every #'(lambda (g)
+                        (setf current-state
+                              (achieve current-state g goal-stack)))
+                    goals)
+             (subsetp goals current-state :test #'equal))
+        current-state)))
+
+(defun orderings (l)
+  (if (> (length l) 1)
+      (list l (reverse l))
+      (list l)))
+
+(defun achieve (state goal goal-stack)
+  "A goal is achieved if it already holds, or if there is an appropriate op for it that is applicable."
+  (dbg-indent :gps (length goal-stack) "Goal:~a" goal)
+  (cond ((member-equal goal state) state)
+        ((member-equal goal goal-stack) nil)
+        (t (some #'(lambda (op) (apply-op state goal op goal-stack))
+                 (appropriate-ops goal state)))))
+
+(defun appropriate-ops (goal state)
+  "Return a list of appropriate operators, sorted by the number of unfulfilled preconditions."
+  (sort (copy-list (find-all goal *ops* :test #'appropriate-p)) #' <
+        :key #'(lambda (op)
+                 (count-if #'(lambda (precond)
+                               (not (member-equal precond state)))
+                           (op-preconds op)))))
+
 ;;;;;OUTPUTS - Blocks World Domain
+;; CL-USER> (use (make-block-ops '(a b)))
+;; 4
+
+;; CL-USER> (gps `((a on table) (b on table) (space on a) (space on b)
+;;                              (space on table))
+;;               `((a on b) (b on table)))
+;; 0: (GPS ((A ON TABLE) (B ON TABLE) (SPACE ON A) (SPACE ON B) (SPACE ON TABLE)) ((A ON B) (B ON TABLE)))
+;; 0: GPS returned ((START) (EXECUTING (MOVE A FROM TABLE TO B)))
+;; ((START) (EXECUTING (MOVE A FROM TABLE TO B)))
+
+;; CL-USER> (debug2 :gps)
+;; (:GPS)
+
+;; CL-USER> (gps `((a on b) (b on table) (space on a) (space on table))
+;;               `((b on a)))
+;; 0: (GPS ((A ON B) (B ON TABLE) (SPACE ON A) (SPACE ON TABLE)) ((B ON A)))
+;; Goal: (B ON A) 
+;; Consider: (MOVE B FROM TABLE TO A)
+;; Goal: (SPACE ON B) 
+;; Consider: (MOVE A FROM B TO TABLE)
+;; Goal: (SPACE ON A) 
+;; Goal: (SPACE ON TABLE) 
+;; Goal: (A ON B) 
+;; Action: (MOVE A FROM B TO TABLE)
+;; Goal: (SPACE ON A) 
+;; Goal: (B ON TABLE) 
+;; Action: (MOVE B FROM TABLE TO A)  0: GPS returned
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE))
+;;          (EXECUTING (MOVE B FROM TABLE TO A)))
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE))
+;;          (EXECUTING (MOVE B FROM TABLE TO A)))
+
+;; CL-USER> (undebug)
+;; NIL
+
+;; CL-USER> (use (make-block-ops '(a b c)))
+;; 18
+
+;; CL-USER> (gps '((a on b) (b on c) (c on table) (space on a) (space on table))
+;;               '((b on a) (c on b))) 
+;; 0: (GPS ((A ON B) (B ON C) (C ON TABLE) (SPACE ON A) (SPACE ON TABLE)) ((B ON A) (C ON B)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE))
+;;          (EXECUTING (MOVE B FROM C TO A)) (EXECUTING (MOVE C FROM TABLE TO B)))
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE)) (EXECUTING (MOVE B FROM C TO A))
+;;          (EXECUTING (MOVE C FROM TABLE TO B)))
+
+;; CL-USER> (gps '((a on b) (b on c) (c on table) (space on a) (space on table))
+;;               '(( c on b) (b on a)))
+;; 0: (GPS ((A ON B) (B ON C) (C ON TABLE) (SPACE ON A) (SPACE ON TABLE)) ((C ON B) (B ON A)))
+;; 0: GPS returned NIL
+
+;; CL-USER> (gps '(( c on a) (a on table) (b on table)
+;;                 (space on c) (space on b) (space on table))
+;;               '(( c on table)))
+;; 0: (GPS ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE)) ((C ON TABLE)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE C FROM A TO B))
+;;          (EXECUTING (MOVE C FROM B TO TABLE)))
+;; ((START) (EXECUTING (MOVE C FROM A TO B)) (EXECUTING (MOVE C FROM B TO TABLE)))
+
+;; CL-USER>  (gps '(( c on a) (a on table) (b on table)
+;;                  (space on c) (space on b) (space on table))
+;;                '(( c on table) (a on b)))
+;; 0: (GPS ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE)) ((C ON TABLE) (A ON B)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE C FROM A TO B))
+;;          (EXECUTING (MOVE C FROM B TO TABLE))
+;;          (EXECUTING (MOVE A FROM TABLE TO C)) (EXECUTING (MOVE A FROM C TO B)))
+;; ((START) (EXECUTING (MOVE C FROM A TO B)) (EXECUTING (MOVE C FROM B TO TABLE))
+;;          (EXECUTING (MOVE A FROM TABLE TO C)) (EXECUTING (MOVE A FROM C TO B)))
+
+;; CL-USER> (gps '(( c on a) (a on table) (b on table)
+;;                 (space on c) (space on b) (space on table))
+;;               '(( c on table) (a on b))) 
+;; 0: (GPS ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE)) ((C ON TABLE) (A ON B)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE C FROM A TO TABLE))
+;;          (EXECUTING (MOVE A FROM TABLE TO B)))
+;; ((START) (EXECUTING (MOVE C FROM A TO TABLE))
+;;          (EXECUTING (MOVE A FROM TABLE TO B)))
+
+;; CL-USER> (gps '((a on b) (b on c) (c on table) (space on a) (space on table))
+;;               '((b on a) (c on b)))
+;; 0: (GPS ((A ON B) (B ON C) (C ON TABLE) (SPACE ON A) (SPACE ON TABLE)) ((B ON A) (C ON B)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE))
+;;          (EXECUTING (MOVE B FROM C TO A)) (EXECUTING (MOVE C FROM TABLE TO B)))
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE)) (EXECUTING (MOVE B FROM C TO A))
+;;          (EXECUTING (MOVE C FROM TABLE TO B)))
+
+;; CL-USER> (gps '((a on b) (b on c) (c on table) (space on a) (space on table)) '((c on b) (b on a)))
+;; 0: (GPS ((A ON B) (B ON C) (C ON TABLE) (SPACE ON A) (SPACE ON TABLE)) ((C ON B) (B ON A)))
+;; 0: GPS returned
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE))
+;;          (EXECUTING (MOVE B FROM C TO A)) (EXECUTING (MOVE C FROM TABLE TO B)))
+;; ((START) (EXECUTING (MOVE A FROM B TO TABLE)) (EXECUTING (MOVE B FROM C TO A))
+;;          (EXECUTING (MOVE C FROM TABLE TO B)))
+
+;; CL-USER> (setf start '(( c on a) (a on table) (b on table) (space on c) (space on b) (space on table)))
+;;                                         ; in: SETF START
+;;                                         ;     (SETF START
+;;                                         ;             '((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B)
+;;                                         ;               (SPACE ON TABLE)))
+;;                                         ; ==>
+;;                                         ;   (SETQ START
+;;                                         ;           '((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B)
+;;                                         ;             (SPACE ON TABLE)))
+;;                                         ; 
+;;                                         ; caught WARNING:
+;;                                         ;   undefined variable: COMMON-LISP-USER::START
+;;                                         ; 
+;;                                         ; compilation unit finished
+;;                                         ;   Undefined variable:
+;;                                         ;     START
+;;                                         ;   caught 1 WARNING condition
+;; ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE))
+
+;; CL-USER> (gps start '((a on b) (b on c)))
+;; 0: (GPS ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE)) ((A ON B) (B ON C)))
+;; 0: GPS returned NIL
+;; NIL
+
+;; CL-USER> (gps start '((b on c) (a on b)))
+;; 0: (GPS ((C ON A) (A ON TABLE) (B ON TABLE) (SPACE ON C) (SPACE ON B) (SPACE ON TABLE)) ((B ON C) (A ON B)))
+;; 0: GPS returned NIL
+;; NIL
+
+
+;;;;;4.16 - OUTPUTS
+
+;; CL-USER> (use(push (op 'taxi-son-to-school
+;;                        :preconds '(son-at-home have-money)
+;;                        :add-list '(son-at-school)
+;;                        :del-list '(son-at-home have-money))
+;;                    *school-ops*))
+;; 8
+
+;; CL-USER> (debug2 :gps)
+;; (:GPS)
+
+;; CL-USER> (gps '(son-at-home have-money car-works)
+;;               '(son-at-school have-money))
+;; 0: (GPS (SON-AT-HOME HAVE-MONEY CAR-WORKS) (SON-AT-SCHOOL HAVE-MONEY))
+;; Goal:SON-AT-SCHOOL
+;; Consider: TAXI-SON-TO-SCHOOL
+;; Goal:SON-AT-HOME
+;; Goal:HAVE-MONEY
+;; Action: TAXI-SON-TO-SCHOOL
+;; Goal:HAVE-MONEY
+;; Goal:HAVE-MONEY
+;; Goal:SON-AT-SCHOOL
+;; Consider: TAXI-SON-TO-SCHOOL
+;; Goal:SON-AT-HOME
+;; Goal:HAVE-MONEY
+;; Action: TAXI-SON-TO-SCHOOL  0: GPS returned NIL
+;; NIL
