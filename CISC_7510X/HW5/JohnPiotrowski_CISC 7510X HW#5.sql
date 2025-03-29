@@ -1,5 +1,4 @@
 -- John Piotrowski - HW5 - 7510x
--- SET search_path = public, "$user", public;
 
 with valid_stocks_2013 as (
 	select *
@@ -12,9 +11,8 @@ valid_stocks_dec as (
 	select * 
 	from valid_stocks_2013
 	where extract(month from tdate) = 12
---	and symbol in ('TSEM','PATH','CALI','BGMD','ELMD','ALIM','OCLS')
 ),
-min_trade_month_per_symbol as (
+first_trade_month_per_symbol as (
     select 
         symbol, 
         extract(month from min(tdate)) as first_trade_month
@@ -28,7 +26,7 @@ trades_above_10mil_dec as (
 		v.prcnt
 	from valid_stocks_dec v
 	join cts on v.symbol = cts.symbol and v.tdate = cts.tdate
-	join min_trade_month_per_symbol mtm on mtm.symbol = v.symbol
+	join first_trade_month_per_symbol mtm on mtm.symbol = v.symbol
 	where first_trade_month = 1					-- filter stocks like ATHM that didn't exist in Jan 2013
 	group by v.tdate, v.symbol, v.prcnt, cts.close, cts.volume
 	having cts.close * cts.volume > 10000000	-- est. daily trading total
