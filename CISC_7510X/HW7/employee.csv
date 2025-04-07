@@ -1,0 +1,12 @@
+empid,fname,lname,managerid,departmentid,employee_rank
+1,Alice,Smith,,10,CEO
+2,Bob,Jones,1,10,SVP
+3,Clara,Lee,2,20,VP
+4,David,White,3,20,Director
+5,John,Doe,4,30,Manager
+42,Emily,Green,5,30,Engineer
+24,Liam,Brown,5,30,Engineer
+50,Ava,Johnson,42,30,Associate
+51,Noah,Williams,42,30,Associate
+52,Ethan,Davis,42,30,Associate
+60,Bill,Nye,50,30,Associate
