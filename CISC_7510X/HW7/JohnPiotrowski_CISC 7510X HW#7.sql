@@ -143,41 +143,7 @@
 --from chain_of_managers
 
 -- 12.
---with recursive chain_of_managers as (
---	select *, 0 as levels_above
---	from employee
---	where empid = 42 or empid = 24
---	union all
---	select e.*, levels_above + 1
---	from employee e, chain_of_managers c
---	where e.empid = c.managerid
---)
---select *, count(empid) over (partition by empid) as cnt
---from chain_of_managers c
---where empid != 42 and empid != 24
---group by empid, c.fname, c.lname, c.managerid, c.departmentid, c.employee_rank, c.levels_above
---order by levels_above asc
---limit 1
-
--- 13.
-with recursive chain_of_managers as (
-	select *, 0 as levels_above
-	from employee
-	where empid = 42 or empid = 24
-	union all
-	select e.*, levels_above + 1
-	from employee e, chain_of_managers c
-	where e.empid = c.managerid
-), 
-most_immediate_manager as (
-	select *, count(empid) over (partition by empid) as cnt
-	from chain_of_managers c
-	where empid != 42 and empid != 24
-	group by empid, c.fname, c.lname, c.managerid, c.departmentid, c.employee_rank, c.levels_above
-	order by levels_above asc
-	limit 1
-),
-chain_of_managers_42 as (
+with recursive chain_of_managers_42 as (
 	select *, 0 as levels_above_42
 	from employee
 	where empid = 42
@@ -185,41 +151,73 @@ chain_of_managers_42 as (
 	select e.*, levels_above_42 + 1
 	from employee e, chain_of_managers_42 c
 	where e.empid = c.managerid
+),
+chain_of_managers_24 as (
+	select *, 0 as levels_above_24
+	from employee
+	where empid = 24
+	union all
+	select e.*, levels_above_24 + 1
+	from employee e, chain_of_managers_24 c
+	where e.empid = c.managerid
+)
+select man42.empid, man42.fname, man42.lname
+from chain_of_managers_42 man42
+inner join chain_of_managers_24 man24 on man42.empid = man24.empid
+order by levels_above_42 asc
+limit 1
+
+-- 13.
+with recursive chain_of_managers_42 as (
+	select *, 0 as levels_above_42
+	from employee
+	where empid = 42
+	union all
+	select e.*, levels_above_42 + 1
+	from employee e, chain_of_managers_42 c
+	where e.empid = c.managerid
+),
+chain_of_managers_24 as (
+	select *, 0 as levels_above_24
+	from employee
+	where empid = 24
+	union all
+	select e.*, levels_above_24 + 1
+	from employee e, chain_of_managers_24 c
+	where e.empid = c.managerid
+),
+most_immediate_common_manager as (
+	select man42.empid as empid, man42.fname as fname, man42.lname as lname, levels_above_42, levels_above_24
+	from chain_of_managers_42 man42
+	inner join chain_of_managers_24 man24 on man42.empid = man24.empid
+	order by levels_above_42 asc
+	limit 1
+),
+up_from_42 as (
+	select empid, fname, lname, levels_above_42
+	from chain_of_managers_42
+	where levels_above_42 < (select levels_above_42 from most_immediate_common_manager)		-- only show the top-level manager on the way down so '<' not '<='
+),
+down_to_24 as (
+	select empid, fname, lname, 0 as levels_below_common_manager
+	from employee
+	where empid = (select empid from most_immediate_common_manager)
+	union all
+	select e.empid, e.fname, e.lname, levels_below_common_manager + 1
+	from employee e, down_to_24
+	where e.managerid = down_to_24.empid
+	and exists (			-- This acts as a way to prune irrelevant branches that don't traverse to empid 24
+        select *
+        from chain_of_managers_24 c
+        where c.empid = e.empid
+    )
+),
+stitch_together_paths as (
+	select empid, fname, lname
+	from up_from_42
+	union all
+	select empid, fname, lname
+	from down_to_24
 )
 select *
-from chain_of_managers_42 c
-cross join most_immediate_manager imm
-where imm.empid = c.empid
-
---chain_of_managers_24 as (
---	select *, 0 as levels_above
---	from employee
---	where empid = 24
---	union all
---	select e.*, levels_above + 1
---	from employee e, chain_of_managers_24 c
---	where e.empid = c.managerid
---),
---most_immediate_manager as (
---	select *, count(empid) over (partition by empid) as cnt
---	from chain_of_managers c
---	where empid != 42 and empid != 24
---	group by empid, c.fname, c.lname, c.managerid, c.departmentid, c.employee_rank, c.levels_above
---	order by levels_above asc
---	limit 1
---)
-
-
-
-
-
-
---both_chains as (
---	select *
---	from chain_of_managers_42 c42
---	full outer join chain_of_managers_24 c24 on c42.empid = c24.empid
-----	where c42.empid != 42 and c24.empid != 24
-----	limit 1
---)
---select *
---from both_chains
+from stitch_together_paths 
