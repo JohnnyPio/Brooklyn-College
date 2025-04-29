@@ -42,7 +42,7 @@ deduped_violations as (
         b_cid, 
         a_timestamp,
         distance_between,
-        row_number() over (partition by a_cid, b_cid order by a_timestamp) as rn
+        row_number() over (partition by a_cid, b_cid order by a_timestamp) as rn	-- only write 1 ticket for when 2 cars are too close, instead of 1 for every second they are too close
     from actual_violators
 )
 select *
