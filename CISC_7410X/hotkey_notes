@@ -4,7 +4,7 @@
 C-space : starts the highlight
 
 ;;; Parenthesis
-;Add
+C-x C-; : comment/uncomment whole line
 M-( : adds a level
 
 ;Delete
