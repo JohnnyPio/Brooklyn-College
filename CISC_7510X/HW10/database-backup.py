@@ -63,7 +63,7 @@ for table in db_table_names:
         csv_writer.writerow(col_names)
 
         while True:
-            rows = table_cursor.fetchmany(1000)
+            rows = table_cursor.fetchall()
             if not rows:
                 break
             for row in rows:
