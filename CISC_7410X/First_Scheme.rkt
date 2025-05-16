@@ -1,5 +1,6 @@
 #lang scheme
 (require malt)
+(require racket/trace)
 
 ;; using (define)
 (define pi 3.14)
@@ -174,35 +175,172 @@
 (((l2-loss line) xs ys) (list 3.0 0.0))  ;;114.21
 ;;This gives us a curve, the slope of which is the gradient
 
-(define obj
-  ((l2-loss line) xs ys))
+(define obj-func  ((l2-loss line) xs ys))
 
-(obj (list -1.0 0.0))
-(obj (list -0.0 0.0))
-(obj (list 1.0 0.0))
-(obj (list 2.0 0.0))
-(obj (list 3.0 0.0))
+(obj-func (list -1.0 0.0))
+(obj-func (list -0.0 0.0))
+(obj-func (list 1.0 0.0))
+(obj-func (list 2.0 0.0))
+(obj-func (list 3.0 0.0))
+
+(define grad-obj
+  (lambda (theta)
+    ;; example gradient function; modify as needed
+    (map (lambda (x) (* x x)) theta))) ; gradient = theta ^ 2
+
+
+;;GRADIENT DESCENT
+;;For every theta was get a loss, the gradient descent curve is the graph of the theta (X) and loss (Y)
+;;The malt package has a function taht will return the slope of the tangent line GRADIENT-OF
+
+
+;; (define gradient-descent-old
+;;   (lambda (object s-theta)
+;;     (let ((f (lambda (b-theta)
+;;                (map (lambda (p g)
+;;                       (- p (* a g)))
+;;                     b-theta
+;;                     (grad-obj b-theta)))))
+;;       (revise f revs s-theta))))
+
+;; (gradient-descent-old obj-func (list 0.0 0.0))
+
+;; Let's take x^2 as example, If we want to know the slope of function, we can use gradient-of in malt.
+
+(gradient-of (lambda (x) (sqr x)) 18) ;;36.0
+(gradient-of (lambda (x) (sqr x)) 12) ;;24.0
+
+;; usually theta is amde up on more than one param, so gradient-of will find the gradient with respect to each parameter
+(gradient-of (lambda (x) (sqr x)) (tensor 5.0 3.0))  ;;(Tensor 10.0 6.0)
+
+;; in the previous example, we use theta0 to approximate rate of change
+
+(gradient-of (lambda (theta) (obj-func theta)) (list 0.0 0.0))  ;;(-63.0 -21.0)
+
+;; We need to keep revising theta until we find the optimal theta
+;; we can apply the grandient-of function repeatdedly to determine the rate-of-change at each theta
+;; we use revise, a recursive function that applies a revision func to theta a REVS number of times
 
 (define revise
   (lambda (f revs theta)
-    (cond ((zero? revs) theta)
+    (cond
+      ((zero? revs) theta)
           (else
            (revise f (sub1 revs) (f theta))))))
 
-(define func-f
-  (lambda (theta2)
-  (map (lambda (p)
-         (- p 3))
-       theta2)))
+(define minus-3 (lambda (theta)
+                  (map (lambda (p)
+                         (- p 3)) theta)))
 
-(revise func-f 5 (list 1 2 3))
+(minus-3 '(3 6 9))
+(revise minus-3 5 '(9 12 15))
 
-(define grad-obj .1)
+;; We need to come up with a revision function to pass to revise, takes 3 args
+;; Learning rate = alpha
+;; Number of revs = revisions
+
+
+(let ((f (lambda (theta)
+           (let ((gs (gradient-of (lambda (theta) (((l2-loss line) xs ys) theta)) theta)))
+             (list
+              (- (ref theta 0) (* .01 (ref gs 0)))
+              (- (ref theta 1) (* .01 (ref gs 1))))))))
+  (revise f 1000 (list 0.0 0.0)))
+
+;; Now need to cleanup the revision function, it only works on a obj. func. that takes thetas of two params. We need to generalize.
+
+;; (map (lambda (param gradient)
+;;        (- param (* alpha gradient)))
+;;      theta
+;;      gradients)
+
+(define revs 1000)
+(define alpha .01)
+
+
+;; (let ((f (lambda (theta)
+;;              (map (lambda (param gradient)
+;;                     (- param (* alpha gradient)))
+;;                   theta
+;;                   (gradient-of (lambda (theta) (((l2-loss line) xs ys) theta)) theta)))))
+;;   (revise f revs (list 0.0 0.0)))
 
 (define gradient-descent
-  (lambda (object s-theta)
-    (let ((f lambda b-theta)
-            (map(lambda (p g)
-                  (- p (* a g)))
-                b-theta
-                (grad-obj b-theta)))    (revise f revs s-theta))))
+  (lambda (obj theta)
+    (let ((f (lambda (big-theta)
+               (map (lambda (param gradient)
+                      (- param (* alpha gradient)))
+                    big-theta
+                    (gradient-of (lambda (big-theta) (obj big-theta)) big-theta)))))
+      (revise f revs theta))))
+
+;; (trace gradient-descent)
+;; (trace revise)
+;; (trace l2-loss)
+
+;;here we call our gradient descent function we call 
+(gradient-descent
+ ((l2-loss line) xs  ys)
+ (list 0.0 0.0))
+
+;; (declare-hyper smaller)
+;; (declare-hyper larger)
+
+;; (with-hypers
+;;   ((smaller 1)
+;;    (larger 2000))
+;;   (+ smaller larger))
+
+;;;;;;; CHAPTER 5
+
+;; (declare-hyper alpha)
+;; (declare-hyper revs)
+
+(with-hypers
+  ((alpha .01)
+   (revs 1000))
+  (gradient-descent
+   ((l2-loss line) xs ys)
+   (list 0.0 0.0)))
+
+
+;;Try it on a more complex, quadratic equation
+(define q-xs (tensor -1.0 0.0 1.0 2.0 3.0))
+(define q-ys (tensor 2.55 2.1 4.35 10.2 18.25))
+
+(define quad
+  (lambda (t)
+    (lambda (theta)
+      (+ (* (ref theta 0) (sqr t))
+         (+ (* (ref theta 1) t) (ref theta 2))))))
+
+(gradient-descent ((l2-loss quad) q-xs q-ys) (list 0.0 0.0 0.0))
+
+;; Try it on plane
+(define plane
+  (lambda (t)
+    (lambda (theta)
+      (+ (dot-product  (ref theta 0)  t) (ref theta 1)))))
+
+;; this is our data set of planes arguments
+(define p-xs (tensor
+              (tensor 1.0 2.05)
+              (tensor 1.0 3.0)
+              (tensor 2.0 2.0)
+              (tensor 2.0 3.91)
+              (tensor 3.0 6.13)
+              (tensor 4.0 8.09)))
+
+;; these are the givne y's
+(define p-ys (tensor 13.99 15.99 18.0 22.4 30.2 37.94))
+
+(define our-dot
+  (lambda (w t)
+    (sum (* w t))))
+
+(with-hypers
+  ((revs 1000)
+   (alpha .001))
+  (gradient-descent
+   ((l2-loss plane) p-xs p-ys)
+   (list (tensor 0.0 0.0) 0.0)))
