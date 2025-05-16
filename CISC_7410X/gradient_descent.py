@@ -1,7 +1,7 @@
 # John Piotrowski - 7410X - Final Project
 # implement a generic gradient descent function in any other programming language that you can pass in a line, curve, and plane. That can take dataset and any equation and find best fit theta. And it should take hyper parametsr ir ha e some felxible method for sealing with hyperparams
 
-# Increase recursion limit to be greater than python's default 1000 limit :)
+# Increase python's recursion limit to be greater than the default 1000 :)
 import sys
 sys.setrecursionlimit(2000)
 
@@ -38,18 +38,6 @@ plane = lambda ts: \
     lambda theta: \
         [(our_dot(theta[0],t)) + theta[1] for t in ts]
 
-# Early Quad
-t = [3.0]
-theta_quad_early = [4.5, 2.1, 7.8]
-
-# Dot Testing
-dot_1 = [2.0, 1.0, 7.0]
-dot_2 = [8.0, 4.0, 3.0]
-
-# print(line(xs)(theta_line))
-# print(quad(t)(theta_quad_early))
-# print(our_dot(dot_1, dot_2))
-
 l2_loss = \
     lambda target: \
         lambda xs, ys: \
@@ -59,39 +47,82 @@ l2_loss = \
                 for i in range(min(len(ys), len(target(xs)(theta))))
 ))
 
-print(f"l2-loss is {(l2_loss(line)(xs,ys)(theta_line))}")
+# # Early testing
+# # Early Quad
+# t = [3.0]
+# theta_quad_early = [4.5, 2.1, 7.8]
+# # Dot Testing
+# dot_1 = [2.0, 1.0, 7.0]
+# dot_2 = [8.0, 4.0, 3.0]
+# print(line(xs)(theta_line))
+# print(quad(t)(theta_quad_early))
+# print(our_dot(dot_1, dot_2))
+# print(f"l2-loss is {(l2_loss(line)(xs,ys)(theta_line))}")
 
-def revise(f, revs, theta):
-    if revs == 0:
-        return theta
+def contains_tensor(theta):
+    if any(isinstance(x, list) for x in theta):
+        return True
     else:
-        return revise(f, revs - 1, f(theta))
+        return False
 
-# Best ChatGPT translation of the gradient-of function from malt
+def gradient_of_lists(f, theta, eps):
+    return [
+        (f([theta[j] + eps if j == i else theta[j] for j in range(len(theta))]) -
+         f([theta[j] - eps if j == i else theta[j] for j in range(len(theta))])) / (2 * eps)
+        for i in range(len(theta))
+    ]
+
+# def gradient_of_tensors(f, theta, eps):
+#     grad = []
+#     # Handle the tensor (nested list) part
+#     for i in range(len(theta[0])):
+#         theta_plus = [theta[0][:], theta[1]]  # Create a copy
+#         theta_minus = [theta[0][:], theta[1]]  # Create a copy
+#         theta_plus[0][i] += eps
+#         theta_minus[0][i] -= eps
+#         grad_i = (f(theta_plus) - f(theta_minus)) / (2 * eps)
+#         grad.append(grad_i)
+#     # Handle the bias term
+#     theta_plus = [theta[0][:], theta[1] + eps]
+#     theta_minus = [theta[0][:], theta[1] - eps]
+#     grad_bias = (f(theta_plus) - f(theta_minus)) / (2 * eps)
+#     return [grad, grad_bias]
+
+def flatten(theta):
+    flat = []
+    shape = []
+    for param in theta:
+        if isinstance(param, list):
+            shape.append(len(param))
+            flat.extend(param)
+        else:
+            shape.append(1)
+            flat.append(param)
+    return flat, shape
+
+def unflatten(flat, shape):
+    rebuilt = []
+    index = 0
+    for count in shape:
+        if count == 1:
+            rebuilt.append(flat[index])
+            index += 1
+        else:
+            rebuilt.append(flat[index:index + count])
+            index += count
+    return rebuilt
+
+def gradient_of_tensors(f, theta, eps=1e-6):
+    flat_theta, shape = flatten(theta)
+    flat_grad = gradient_of_lists(lambda flat: f(unflatten(flat, shape)), flat_theta, eps)
+    return unflatten(flat_grad, shape)
+
 def gradient_of(f, theta, eps=1e-6):
-    if isinstance(theta, list) and any(isinstance(x, list) for x in theta):
-        # Handle nested parameters (like for plane)
-        grad = []
-        # Handle the nested list part
-        for i in range(len(theta[0])):
-            theta_plus = [theta[0][:], theta[1]]  # Create a copy
-            theta_minus = [theta[0][:], theta[1]]  # Create a copy
-            theta_plus[0][i] += eps
-            theta_minus[0][i] -= eps
-            grad_i = (f(theta_plus) - f(theta_minus)) / (2 * eps)
-            grad.append(grad_i)
-        # Handle the bias term
-        theta_plus = [theta[0][:], theta[1] + eps]
-        theta_minus = [theta[0][:], theta[1] - eps]
-        grad_bias = (f(theta_plus) - f(theta_minus)) / (2 * eps)
-        return [grad, grad_bias]
+    if contains_tensor(theta):
+        return gradient_of_tensors(f,theta,eps)
     else:
-        # Original implementation for flat parameters
-        return [
-            (f([theta[j] + eps if j == i else theta[j] for j in range(len(theta))]) -
-             f([theta[j] - eps if j == i else theta[j] for j in range(len(theta))])) / (2 * eps)
-            for i in range(len(theta))
-        ]
+        return gradient_of_lists(f,theta,eps)
+
 
 # def gradient_descent(obj, theta, alpha, revs):
 #     def f(big_theta):
@@ -112,6 +143,12 @@ def gradient_of(f, theta, eps=1e-6):
 #     revs,
 #     theta
 # ))
+
+def revise(f, revs, theta):
+    if revs == 0:
+        return theta
+    else:
+        return revise(f, revs - 1, f(theta))
 
 def gradient_descent(obj, theta, alpha, revs):
     def f(big_theta):
