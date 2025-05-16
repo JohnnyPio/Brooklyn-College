@@ -38,16 +38,19 @@ plane = lambda ts: \
     lambda theta: \
         [(our_dot(theta[0],t)) + theta[1] for t in ts]
 
+
+def pred_ys(target, xs, theta):
+    return target(xs)(theta)
+
 l2_loss = \
     lambda target: \
         lambda xs, ys: \
             lambda theta: (
-                # pred_ys = target(xs)(theta)
-                sum((ys[i] - target(xs)(theta)[i]) ** 2
-                for i in range(min(len(ys), len(target(xs)(theta))))
-))
+                sum((ys[i] - pred_ys(target, xs, theta)[i]) ** 2
+                    for i in range(len(ys)))
+                    )
 
-# # Early testing
+# # Early testing - keeping for posterity
 # # Early Quad
 # t = [3.0]
 # theta_quad_early = [4.5, 2.1, 7.8]
@@ -65,84 +68,62 @@ def contains_tensor(theta):
     else:
         return False
 
-def gradient_of_lists(f, theta, eps):
-    return [
-        (f([theta[j] + eps if j == i else theta[j] for j in range(len(theta))]) -
-         f([theta[j] - eps if j == i else theta[j] for j in range(len(theta))])) / (2 * eps)
-        for i in range(len(theta))
-    ]
+# Using central difference approximation: https://en.wikipedia.org/wiki/Finite_difference
+def gradient_of_list(f, theta, change_of_theta):
+    gradient = []
+    for l1 in range(len(theta)):
+        theta_plus_change = []
+        theta_minus_change = []
+        for l2 in range(len(theta)):
+            if l2 == l1:
+                theta_plus_change.append(theta[l2] + change_of_theta)
+                theta_minus_change.append(theta[l2] - change_of_theta)
+            else:
+                theta_plus_change.append(theta[l2])
+                theta_minus_change.append(theta[l2])
+        total_change_in_f = f(theta_plus_change) - f(theta_minus_change)
+        total_change_in_theta = (2 * change_of_theta)
+        gradient.append(total_change_in_f/total_change_in_theta)
+    return gradient
 
-# def gradient_of_tensors(f, theta, eps):
-#     grad = []
-#     # Handle the tensor (nested list) part
-#     for i in range(len(theta[0])):
-#         theta_plus = [theta[0][:], theta[1]]  # Create a copy
-#         theta_minus = [theta[0][:], theta[1]]  # Create a copy
-#         theta_plus[0][i] += eps
-#         theta_minus[0][i] -= eps
-#         grad_i = (f(theta_plus) - f(theta_minus)) / (2 * eps)
-#         grad.append(grad_i)
-#     # Handle the bias term
-#     theta_plus = [theta[0][:], theta[1] + eps]
-#     theta_minus = [theta[0][:], theta[1] - eps]
-#     grad_bias = (f(theta_plus) - f(theta_minus)) / (2 * eps)
-#     return [grad, grad_bias]
-
+# Needed to add flatten method (pg. 184) for the tensor
 def flatten(theta):
-    flat = []
-    shape = []
+    flattened_list = []
+    original_nested_list_structure = []     # Only will work for tensors of rank 2, good enough for now.
     for param in theta:
         if isinstance(param, list):
-            shape.append(len(param))
-            flat.extend(param)
+            original_nested_list_structure.append(len(param))
+            flattened_list.extend(param)
         else:
-            shape.append(1)
-            flat.append(param)
-    return flat, shape
+            original_nested_list_structure.append(1)
+            flattened_list.append(param)
+    return flattened_list, original_nested_list_structure
 
-def unflatten(flat, shape):
-    rebuilt = []
+# In general, I was surprised by how few resources are out there for unflattening a list with a structure - could be a good opp. for a library
+def unflatten(flattened_list, structure):
+    original_list = []
     index = 0
-    for count in shape:
+    for count in structure:
         if count == 1:
-            rebuilt.append(flat[index])
+            original_list.append(flattened_list[index])
             index += 1
         else:
-            rebuilt.append(flat[index:index + count])
+            original_list.append(flattened_list[index:index + count])
             index += count
-    return rebuilt
+    return original_list
 
-def gradient_of_tensors(f, theta, eps=1e-6):
-    flat_theta, shape = flatten(theta)
-    flat_grad = gradient_of_lists(lambda flat: f(unflatten(flat, shape)), flat_theta, eps)
-    return unflatten(flat_grad, shape)
+def gradient_of_tensor(f, theta, change_of_theta):
+    flattened_theta, structure = flatten(theta)
+    flattened_gradient = gradient_of_list(lambda flattened_list:
+                                  f(unflatten(flattened_list, structure)), flattened_theta, change_of_theta)
+    return unflatten(flattened_gradient, structure)
 
-def gradient_of(f, theta, eps=1e-6):
+def gradient_of(f, theta, change_of_theta=1e-8):
+    # Using the default value (pg. 168)
     if contains_tensor(theta):
-        return gradient_of_tensors(f,theta,eps)
+        return gradient_of_tensor(f, theta, change_of_theta)
     else:
-        return gradient_of_lists(f,theta,eps)
-
-
-# def gradient_descent(obj, theta, alpha, revs):
-#     def f(big_theta):
-#         grad = gradient_of(lambda bt: obj(bt), big_theta)
-#         return [param - alpha * g for param, g in zip(big_theta, grad)]
-#     return revise(f, revs, theta)
-
-# gradient_descent = \
-#     lambda obj, theta, alpha, revs: (
-#         revise(
-#         lambda big_theta: [
-#             param - (alpha * g)
-#             for param, g in zip(
-#                 big_theta,
-#                 gradient_of(lambda b_t: obj(b_t), big_theta)
-#         )
-#     ],
-#     revs,
-#     theta
-# ))
+        return gradient_of_list(f, theta, change_of_theta)
 
 def revise(f, revs, theta):
     if revs == 0:
@@ -150,28 +131,24 @@ def revise(f, revs, theta):
     else:
         return revise(f, revs - 1, f(theta))
 
+
 def gradient_descent(obj, theta, alpha, revs):
     def f(big_theta):
-        grad = gradient_of(lambda b_t: obj(b_t), big_theta)
-        if isinstance(big_theta, list) and any(isinstance(x, list) for x in big_theta):
-            # Handle nested parameters (like for plane)
-            new_weights = [[w - alpha * g for w, g in zip(big_theta[0], grad[0])],
-                         big_theta[1] - alpha * grad[1]]
-            return new_weights
+        gradient = gradient_of(obj, big_theta)
+        if contains_tensor(big_theta):
+            weights = []
+            for i in range(len(big_theta[0])):
+                weights.append(big_theta[0][i] - alpha * gradient[0][i])
+            return [weights, big_theta[1] - alpha * gradient[1]]
         else:
-            # Handle flat parameters
-            return [param - alpha * g for param, g in zip(big_theta, grad)]
+            return [param - alpha * gradient for param, gradient in zip(big_theta, gradient)]
     return revise(f, revs, theta)
 
-
 line_grad_descent = gradient_descent(l2_loss(line)(xs,ys), theta_line, 0.01, 1000)
-
 print(f"gradient descent is {line_grad_descent}")
 
 quad_grad_descent = gradient_descent(l2_loss(quad)(quad_xs,quad_ys), theta_quad, 0.001, 1000)
-
 print(f"gradient descent is {quad_grad_descent}")
 
 plane_grad_descent = gradient_descent(l2_loss(plane)(plane_xs,plane_ys), theta_plane, 0.001, 1000)
-
 print(f"gradient descent is {plane_grad_descent}")
