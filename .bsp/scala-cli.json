@@ -1,0 +1,20 @@
+{
+  "name": "scala-cli",
+  "argv": [
+    "C:\\Users\\JohnS\\AppData\\Local\\Coursier\\data\\bin\\.scala-cli.aux.exe",
+    "bsp",
+    "--json-options",
+    "C:\\Users\\JohnS\\OneDrive\\Documents\\Local-Repos\\Brooklyn-College\\.scala-build\\ide-options-v2.json",
+    "--json-launcher-options",
+    "C:\\Users\\JohnS\\OneDrive\\Documents\\Local-Repos\\Brooklyn-College\\.scala-build\\ide-launcher-options.json",
+    "--envs-file",
+    "C:\\Users\\JohnS\\OneDrive\\Documents\\Local-Repos\\Brooklyn-College\\.scala-build\\ide-envs.json",
+    "C:\\Users\\JohnS\\OneDrive\\Documents\\Local-Repos\\Brooklyn-College"
+  ],
+  "version": "1.7.1",
+  "bspVersion": "2.1.1",
+  "languages": [
+    "scala",
+    "java"
+  ]
+}
