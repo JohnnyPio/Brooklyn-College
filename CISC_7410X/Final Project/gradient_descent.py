@@ -82,13 +82,13 @@ def gradient_of_list(f, theta, change_of_theta):
                 theta_minus_change.append(theta[l2])
         total_change_in_f = f(theta_plus_change) - f(theta_minus_change)
         total_change_in_theta = (2 * change_of_theta)
-        gradient.append(total_change_in_f/total_change_in_theta)
+        gradient.append(total_change_in_f / total_change_in_theta)
     return gradient
 
 # Add flatten method (pg. 184) for the tensor case
 def flatten(theta):
     flattened_list = []
-    original_nested_list_structure = []     # Only will work for tensors of rank 2, good enough for now.
+    original_nested_list_structure = []  # Only will work for tensors of rank 2, good enough for now :)
     for param in theta:
         if isinstance(param, list):
             original_nested_list_structure.append(len(param))
@@ -111,10 +111,18 @@ def unflatten(flattened_list, structure):
             index += count
     return original_list
 
+def get_tensor_elements(theta):
+    i = 0
+    while i < len(theta):
+        if type(theta[i]) == list:
+            return i
+        i += 1
+    return None
+
 def gradient_of_tensor(f, theta, change_of_theta):
     flattened_theta, structure = flatten(theta)
     flattened_gradient = gradient_of_list(lambda flattened_list:
-                                  f(unflatten(flattened_list, structure)), flattened_theta, change_of_theta)
+                                          f(unflatten(flattened_list, structure)), flattened_theta, change_of_theta)
     return unflatten(flattened_gradient, structure)
 
 def gradient_of(f, theta, change_of_theta=1e-8):
@@ -134,9 +142,10 @@ def gradient_descent(obj, theta, alpha, revs):
     def f(big_theta):
         gradient = gradient_of(obj, big_theta)
         if contains_tensor(big_theta):
+            index_of_tensor = get_tensor_elements(big_theta)    # Will only work for the tensor being 1 element, good enough for now :)
             weights = []
-            for i in range(len(big_theta[0])):
-                weights.append(big_theta[0][i] - alpha * gradient[0][i])
+            for i in range(len(big_theta[index_of_tensor])):
+                weights.append(big_theta[index_of_tensor][i] - alpha * gradient[0][i])
             return [weights, big_theta[1] - alpha * gradient[1]]
         else:
             return [big_theta[i] - alpha * gradient[i] for i in range(len(big_theta))]
