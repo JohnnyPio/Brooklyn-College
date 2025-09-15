@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql import functions as F
+from pyspark.sql import functions as F, Window
 
 spark = (SparkSession.builder
     .appName("hw1")
@@ -11,7 +11,7 @@ spark = (SparkSession.builder
     .getOrCreate())
 
 spark.sparkContext.setLogLevel("WARN")
-top_level_dir = "/mnt/c/Users/JohnS/Downloads/CS/7412/pgdvd042010_extracted2/1/0/0"
+top_level_dir = "/mnt/c/Users/JohnS/Downloads/CS/7412/pgdvd042010_extracted2/1/0/0/0"
 
 # Read all .txt files from the top-level directory line-by-line
 df_lines = (spark.read
@@ -98,14 +98,14 @@ word_prob = (bigram_counts
              .orderBy(F.desc("count")))
 
 # Choose a random word in word_counts
-random_word = (
-    word_counts
+random_word = (word_counts
     .orderBy(F.rand())     # shuffle the rows randomly
     .limit(1)              # pick one
     .collect()[0]["word1"]
 )
 
-def next_word_greedy(curr):
+
+def get_next_word(curr):
     row = (word_prob
            .where(F.col("word1") == curr)
            .orderBy(F.desc("probability"))
@@ -117,12 +117,40 @@ def generate_text_greedy(start, max_len=40):
     curr = start
     words = [curr]
     for _ in range(max_len - 1):
-        nxt = next_word_greedy(curr)
+        nxt = get_next_word(curr)
         if not nxt: break
         words.append(nxt)
         curr = nxt
     return " ".join(words)
 
 print(generate_text_greedy(random_word))
+
+# Create trigrams
+w = Window.partitionBy("filename", "sent_id").orderBy("pos")
+trigrams = (df_sentence_ids
+    .select(
+        "filename", "sent_id",
+        F.col("word").alias("w1"),
+        F.lead("word", 1).over(w).alias("w2"),
+        F.lead("word", 2).over(w).alias("w3"),
+    )
+    .where(F.col("w2").isNotNull() & F.col("w3").isNotNull())
+)
+    
+trigram_counts = trigrams.groupBy("w1", "w2", "w3").count()
+context_counts = trigram_counts.groupBy("w1", "w2").agg(F.sum("count").alias("ctx_count"))
+
+tri_prob = (
+    trigram_counts
+    .join(context_counts, ["w1", "w2"])
+    .select(
+        "w1", "w2", "w3",
+        (F.col("count") / F.col("ctx_count")).alias("probability"),
+        "count", "ctx_count",
+    )
+    .orderBy(F.desc("count"))
+)
+
+tri_prob.show(100, False)
 
 spark.stop()
